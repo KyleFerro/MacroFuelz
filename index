@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MacroFuel Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>MacroFuel</h1>
+  <input id="food" placeholder="Food Item">
+  <input id="calories" type="number" placeholder="Calories">
+  <button onclick="addEntry()">Add</button>
+  <ul id="entryList"></ul>
+  <p>Total Calories: <span id="total">0</span></p>
+  <script src="app.js"></script>
+</body>
+</html>
