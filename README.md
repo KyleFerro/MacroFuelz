@@ -10,17 +10,4 @@ Features
 - Save and load data using browser local storage
 - Responsive design for mobile and desktop
 
-Technologies Used
 
-- HTML5
-- CSS3
-- JavaScript (ES6)
-- Local Storage API
-
-Installation
-
-To run the project locally:
-
-```bash
-1. Clone this repository
-2. Open `index.html` in any modern web browser
