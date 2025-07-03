@@ -1,17 +1,133 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MacroFuel Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MacroFuel</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #c0f0f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .nav {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .nav button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-weight: bold;
+      border: none;
+      background-color: #0073b3;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .nav button.active {
+      background-color: #005580;
+    }
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-  <h1>MacroFuel</h1>
-  <input id="food" placeholder="Food Item">
-  <input id="calories" type="number" placeholder="Calories">
-  <button onclick="addEntry()">Add</button>
-  <ul id="entryList"></ul>
-  <p>Total Calories: <span id="total">0</span></p>
-  <script src="app.js"></script>
+
+  <div class="nav">
+    <button id="trackerTab" class="active">Calorie Tracker</button>
+    <button id="checklistTab">Monthly Checklist</button>
+  </div>
+
+  <div class="section active" id="trackerSection">
+    <div class="app">
+      <h1>MacroFuel</h1>
+      <div class="card goal">
+        <h2>Calorie goal</h2>
+        <div class="goal-value">2000 kcal <span class="set-goal">Set goal ></span></div>
+      </div>
+
+      <div class="card consumed">
+        <h2>Total Calories Consumed Today</h2>
+        <div class="consumed-value">78 kcal</div>
+      </div>
+
+      <div class="card new-meal">
+        <h3>New Meal</h3>
+        <input type="text" placeholder="Food" />
+        <input type="number" placeholder="Calories" />
+        <button>+</button>
+      </div>
+
+      <div class="card today-meals">
+        <h3>Today's Meals</h3>
+        <ul>
+          <li>
+            Hard Boiled Eggs - 78 kcal
+            <span class="actions"><a href="#">Edit</a> | <a href="#" class="delete">Delete</a></span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="buttons">
+        <button class="clear">Clear all</button>
+        <button class="save">Save in local storage</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="checklistSection">
+    <div class="app">
+      <h1>MacroFuel</h1>
+      <div class="card">
+        <h2>Monthly Checklist</h2>
+        <p class="tracker">Days goal met: <span id="daysChecked">0</span>/30</p>
+        <div class="grid">
+          <script>
+            for (let i = 1; i <= 30; i++) {
+              document.write(`
+                <label>Day ${i}
+                  <input type="checkbox" class="day-check" onchange="updateTracker()">
+                </label>
+              `);
+            }
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const trackerTab = document.getElementById('trackerTab');
+    const checklistTab = document.getElementById('checklistTab');
+    const trackerSection = document.getElementById('trackerSection');
+    const checklistSection = document.getElementById('checklistSection');
+
+    trackerTab.onclick = () => {
+      trackerTab.classList.add('active');
+      checklistTab.classList.remove('active');
+      trackerSection.classList.add('active');
+      checklistSection.classList.remove('active');
+    };
+
+    checklistTab.onclick = () => {
+      checklistTab.classList.add('active');
+      trackerTab.classList.remove('active');
+      checklistSection.classList.add('active');
+      trackerSection.classList.remove('active');
+    };
+
+    function updateTracker() {
+      const checkboxes = document.querySelectorAll('.day-check');
+      const count = Array.from(checkboxes).filter(cb => cb.checked).length;
+      document.getElementById('daysChecked').textContent = count;
+    }
+  </script>
 </body>
 </html>
