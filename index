@@ -1,133 +1,132 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MacroFuel</title>
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #c0f0f4;
-      margin: 0;
-      padding: 20px;
-    }
-    .nav {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .nav button {
-      margin: 0 10px;
-      padding: 10px 20px;
-      font-weight: bold;
-      border: none;
-      background-color: #0073b3;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .nav button.active {
-      background-color: #005580;
-    }
-    .section {
-      display: none;
-    }
-    .section.active {
-      display: block;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Nutrition Tracker</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-  <div class="nav">
-    <button id="trackerTab" class="active">Calorie Tracker</button>
-    <button id="checklistTab">Monthly Checklist</button>
-  </div>
-
-  <div class="section active" id="trackerSection">
-    <div class="app">
+  <div class="container">
+    <div class="header">
       <h1>MacroFuel</h1>
-      <div class="card goal">
-        <h2>Calorie goal</h2>
-        <div class="goal-value">2000 kcal <span class="set-goal">Set goal ></span></div>
-      </div>
-
-      <div class="card consumed">
-        <h2>Total Calories Consumed Today</h2>
-        <div class="consumed-value">78 kcal</div>
-      </div>
-
-      <div class="card new-meal">
-        <h3>New Meal</h3>
-        <input type="text" placeholder="Food" />
-        <input type="number" placeholder="Calories" />
-        <button>+</button>
-      </div>
-
-      <div class="card today-meals">
-        <h3>Today's Meals</h3>
-        <ul>
-          <li>
-            Hard Boiled Eggs - 78 kcal
-            <span class="actions"><a href="#">Edit</a> | <a href="#" class="delete">Delete</a></span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="buttons">
-        <button class="clear">Clear all</button>
-        <button class="save">Save in local storage</button>
-      </div>
+      <p>Track your nutrition goals</p>
     </div>
-  </div>
 
-  <div class="section" id="checklistSection">
-    <div class="app">
-      <h1>MacroFuel</h1>
-      <div class="card">
-        <h2>Monthly Checklist</h2>
-        <p class="tracker">Days goal met: <span id="daysChecked">0</span>/30</p>
-        <div class="grid">
-          <script>
-            for (let i = 1; i <= 30; i++) {
-              document.write(`
-                <label>Day ${i}
-                  <input type="checkbox" class="day-check" onchange="updateTracker()">
-                </label>
-              `);
-            }
-          </script>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showSection('tracker')">Tracker</button>
+      <button class="nav-tab" onclick="showSection('checklist')">Progress</button>
+    </div>
+
+    <div class="section active" id="tracker">
+      <div class="calories-summary">
+        <h2>Daily Calories</h2>
+        <div class="calories-display">
+          <span id="consumedCalories">0</span> / <span id="calorieGoal">2000</span>
+        </div>
+        <div class="calories-remaining">
+          <span id="remainingCalories">2000</span> calories remaining
+        </div>
+      </div>
+
+      <div class="macros-grid">
+        <div class="macro-card protein">
+          <div class="macro-label">Protein</div>
+          <div class="macro-value">
+            <span id="consumedProtein">0</span>g
+          </div>
+          <div class="macro-remaining">
+            <span id="remainingProtein">150</span>g left
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="proteinProgress"></div>
+          </div>
+        </div>
+
+        <div class="macro-card carbs">
+          <div class="macro-label">Carbs</div>
+          <div class="macro-value">
+            <span id="consumedCarbs">0</span>g
+          </div>
+          <div class="macro-remaining">
+            <span id="remainingCarbs">250</span>g left
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="carbsProgress"></div>
+          </div>
+        </div>
+
+        <div class="macro-card fats">
+          <div class="macro-label">Fats</div>
+          <div class="macro-value">
+            <span id="consumedFats">0</span>g
+          </div>
+          <div class="macro-remaining">
+            <span id="remainingFats">67</span>g left
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="fatsProgress"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="add-food-form">
+        <h3>Add Food</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Food Name</label>
+            <input type="text" id="foodName" placeholder="e.g., Chicken Breast">
+          </div>
+          <div class="form-group">
+            <label>Calories</label>
+            <input type="number" id="calories" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Protein (g)</label>
+            <input type="number" id="protein" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Carbs (g)</label>
+            <input type="number" id="carbs" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Fats (g)</label>
+            <input type="number" id="fats" placeholder="0">
+          </div>
+        </div>
+        <button class="add-btn" onclick="addFood()">Add Food</button>
+      </div>
+
+      <div class="meals-list">
+        <h3>Today's Meals</h3>
+        <div id="mealsList">
+          <div class="empty-state">
+            <p>No meals added yet</p>
+            <p>Add your first meal above!</p>
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="section" id="checklist">
+      <div class="progress-summary">
+        <h3>Monthly Progress</h3>
+        <div class="progress-stat">
+          <span id="daysCompleted">0</span> / 30 days
+        </div>
+        <p style="margin-top: 10px; font-size: 14px; color: #718096;">
+          Days you've met your calorie goal
+        </p>
+      </div>
+
+      <div class="checklist-grid">
+        <!-- Days will be generated by JavaScript -->
+      </div>
+    </div>
   </div>
 
-  <script>
-    const trackerTab = document.getElementById('trackerTab');
-    const checklistTab = document.getElementById('checklistTab');
-    const trackerSection = document.getElementById('trackerSection');
-    const checklistSection = document.getElementById('checklistSection');
-
-    trackerTab.onclick = () => {
-      trackerTab.classList.add('active');
-      checklistTab.classList.remove('active');
-      trackerSection.classList.add('active');
-      checklistSection.classList.remove('active');
-    };
-
-    checklistTab.onclick = () => {
-      checklistTab.classList.add('active');
-      trackerTab.classList.remove('active');
-      checklistSection.classList.add('active');
-      trackerSection.classList.remove('active');
-    };
-
-    function updateTracker() {
-      const checkboxes = document.querySelectorAll('.day-check');
-      const count = Array.from(checkboxes).filter(cb => cb.checked).length;
-      document.getElementById('daysChecked').textContent = count;
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
