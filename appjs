@@ -1,28 +1,188 @@
-let entries = JSON.parse(localStorage.getItem('entries')) || [];
+// Goals (can be made configurable later)
+const goals = {
+  calories: 2000,
+  protein: 150,
+  carbs: 250,
+  fats: 67
+};
 
-function addEntry() {
-  const food = document.getElementById('food').value;
-  const cal = parseInt(document.getElementById('calories').value);
-  if (!food || isNaN(cal)) return;
+// Current totals
+let totals = {
+  calories: 0,
+  protein: 0,
+  carbs: 0,
+  fats: 0
+};
 
-  entries.push({ food, cal });
-  localStorage.setItem('entries', JSON.stringify(entries));
-  render();
-  document.getElementById('food').value = '';
-  document.getElementById('calories').value = '';
+// Meals array
+let meals = [];
+
+// Initialize checklist
+function initializeChecklist() {
+  const checklistGrid = document.querySelector('.checklist-grid');
+  checklistGrid.innerHTML = '';
+  
+  for (let i = 1; i <= 30; i++) {
+    const dayCheckbox = document.createElement('div');
+    dayCheckbox.className = 'day-checkbox';
+    dayCheckbox.innerHTML = `
+      <input type="checkbox" id="day${i}" onchange="updateProgress()">
+      <label for="day${i}">${i}</label>
+    `;
+    checklistGrid.appendChild(dayCheckbox);
+  }
 }
 
-function render() {
-  const list = document.getElementById('entryList');
-  list.innerHTML = '';
-  let total = 0;
-  entries.forEach((e, i) => {
-    const li = document.createElement('li');
-    li.textContent = `${e.food}: ${e.cal} cal`;
-    list.appendChild(li);
-    total += e.cal;
+// Show section
+function showSection(sectionName) {
+  // Update tabs
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.classList.remove('active');
   });
-  document.getElementById('total').textContent = total;
+  event.target.classList.add('active');
+
+  // Update sections
+  document.querySelectorAll('.section').forEach(section => {
+    section.classList.remove('active');
+  });
+  document.getElementById(sectionName).classList.add('active');
 }
 
-window.onload = render;
+// Add food
+function addFood() {
+  const foodName = document.getElementById('foodName').value;
+  const calories = parseInt(document.getElementById('calories').value) || 0;
+  const protein = parseInt(document.getElementById('protein').value) || 0;
+  const carbs = parseInt(document.getElementById('carbs').value) || 0;
+  const fats = parseInt(document.getElementById('fats').value) || 0;
+
+  if (!foodName.trim()) {
+    alert('Please enter a food name');
+    return;
+  }
+
+  // Add to meals array
+  meals.push({
+    name: foodName,
+    calories: calories,
+    protein: protein,
+    carbs: carbs,
+    fats: fats
+  });
+
+  // Update totals
+  totals.calories += calories;
+  totals.protein += protein;
+  totals.carbs += carbs;
+  totals.fats += fats;
+
+  // Clear form
+  document.getElementById('foodName').value = '';
+  document.getElementById('calories').value = '';
+  document.getElementById('protein').value = '';
+  document.getElementById('carbs').value = '';
+  document.getElementById('fats').value = '';
+
+  // Update display
+  updateDisplay();
+}
+
+// Update display
+function updateDisplay() {
+  // Update calories
+  document.getElementById('consumedCalories').textContent = totals.calories;
+  document.getElementById('remainingCalories').textContent = Math.max(0, goals.calories - totals.calories);
+
+  // Update macros
+  document.getElementById('consumedProtein').textContent = totals.protein;
+  document.getElementById('remainingProtein').textContent = Math.max(0, goals.protein - totals.protein);
+  document.getElementById('consumedCarbs').textContent = totals.carbs;
+  document.getElementById('remainingCarbs').textContent = Math.max(0, goals.carbs - totals.carbs);
+  document.getElementById('consumedFats').textContent = totals.fats;
+  document.getElementById('remainingFats').textContent = Math.max(0, goals.fats - totals.fats);
+
+  // Update progress bars
+  updateProgressBar('proteinProgress', totals.protein, goals.protein);
+  updateProgressBar('carbsProgress', totals.carbs, goals.carbs);
+  updateProgressBar('fatsProgress', totals.fats, goals.fats);
+
+  // Update meals list
+  updateMealsList();
+}
+
+// Update progress bar
+function updateProgressBar(elementId, current, goal) {
+  const percentage = Math.min((current / goal) * 100, 100);
+  document.getElementById(elementId).style.width = percentage + '%';
+}
+
+// Update meals list
+function updateMealsList() {
+  const mealsList = document.getElementById('mealsList');
+  
+  if (meals.length === 0) {
+    mealsList.innerHTML = `
+      <div class="empty-state">
+        <p>No meals added yet</p>
+        <p>Add your first meal above!</p>
+      </div>
+    `;
+    return;
+  }
+
+  mealsList.innerHTML = meals.map((meal, index) => `
+    <div class="meal-item">
+      <div class="meal-info">
+        <div class="meal-name">${meal.name}</div>
+        <div class="meal-macros">
+          P: ${meal.protein}g • C: ${meal.carbs}g • F: ${meal.fats}g
+        </div>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div class="meal-calories">${meal.calories} cal</div>
+        <button class="delete-btn" onclick="deleteMeal(${index})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Delete meal
+function deleteMeal(index) {
+  const meal = meals[index];
+  
+  // Subtract from totals
+  totals.calories -= meal.calories;
+  totals.protein -= meal.protein;
+  totals.carbs -= meal.carbs;
+  totals.fats -= meal.fats;
+
+  // Remove from meals array
+  meals.splice(index, 1);
+
+  // Update display
+  updateDisplay();
+}
+
+// Update progress (for checklist)
+function updateProgress() {
+  const checkboxes = document.querySelectorAll('.day-checkbox input[type="checkbox"]');
+  const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
+  document.getElementById('daysCompleted').textContent = completed;
+}
+
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  initializeChecklist();
+  updateDisplay();
+});
+
+// Also initialize immediately in case DOMContentLoaded has already fired
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeChecklist();
+    updateDisplay();
+  });
+} else {
+  initializeChecklist();
+  updateDisplay();
+}
