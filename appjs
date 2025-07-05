@@ -1,126 +1,291 @@
-// Goals (can be made configurable later)
-const goals = {
-  calories: 2000,
-  protein: 150,
-  carbs: 250,
-  fats: 67
+// MacroFuel - Nutrition Tracker JavaScript
+
+// Global variables
+let dailyData = {
+  consumed: {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fats: 0
+  },
+  goals: {
+    calories: 2000,
+    protein: 150,
+    carbs: 250,
+    fats: 67
+  },
+  meals: []
 };
 
-// Current totals
-let totals = {
-  calories: 0,
-  protein: 0,
-  carbs: 0,
-  fats: 0
-};
+// Check if localStorage is available (it won't be in Claude artifacts)
+const isLocalStorageAvailable = (() => {
+  try {
+    const test = '__localStorage_test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch (e) {
+    return false;
+  }
+})();
 
-// Meals array
-let meals = [];
+let monthlyProgress = {};
+if (isLocalStorageAvailable) {
+  monthlyProgress = JSON.parse(localStorage.getItem('monthlyProgress')) || {};
+}
 
-// Initialize checklist
-function initializeChecklist() {
-  const checklistGrid = document.querySelector('.checklist-grid');
-  checklistGrid.innerHTML = '';
+// Initialize the app
+document.addEventListener('DOMContentLoaded', function() {
+  loadDailyData();
+  generateChecklistDays();
+  updateDisplay();
+  updateProgressStats();
+});
+
+// Navigation functions
+function showSection(sectionId) {
+  // Hide all sections
+  const sections = document.querySelectorAll('.section');
+  sections.forEach(section => section.classList.remove('active'));
   
-  for (let i = 1; i <= 30; i++) {
-    const dayCheckbox = document.createElement('div');
-    dayCheckbox.className = 'day-checkbox';
-    dayCheckbox.innerHTML = `
-      <input type="checkbox" id="day${i}" onchange="updateProgress()">
-      <label for="day${i}">${i}</label>
-    `;
-    checklistGrid.appendChild(dayCheckbox);
+  // Show selected section
+  const targetSection = document.getElementById(sectionId);
+  if (targetSection) {
+    targetSection.classList.add('active');
+  }
+  
+  // Update active tab
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(tab => tab.classList.remove('active'));
+  
+  // Find and activate the correct tab
+  const clickedTab = Array.from(tabs).find(tab => 
+    tab.textContent.toLowerCase().includes(sectionId.toLowerCase()) ||
+    tab.onclick?.toString().includes(sectionId)
+  );
+  if (clickedTab) {
+    clickedTab.classList.add('active');
   }
 }
 
-// Show section
-function showSection(sectionName) {
-  // Update tabs
-  document.querySelectorAll('.nav-tab').forEach(tab => {
-    tab.classList.remove('active');
-  });
-  event.target.classList.add('active');
-
-  // Update sections
-  document.querySelectorAll('.section').forEach(section => {
-    section.classList.remove('active');
-  });
-  document.getElementById(sectionName).classList.add('active');
-}
-
-// Add food
+// Food management functions
 function addFood() {
-  const foodName = document.getElementById('foodName').value;
-  const calories = parseInt(document.getElementById('calories').value) || 0;
-  const protein = parseInt(document.getElementById('protein').value) || 0;
-  const carbs = parseInt(document.getElementById('carbs').value) || 0;
-  const fats = parseInt(document.getElementById('fats').value) || 0;
-
-  if (!foodName.trim()) {
+  // Get food name and calories
+  const foodNameInput = document.getElementById('foodName') || document.querySelector('input[placeholder*="Grilled Chicken"]') || document.querySelector('input[placeholder*="Chicken"]');
+  const caloriesInput = document.getElementById('calories') || document.querySelector('input[placeholder="0"]');
+  
+  if (!foodNameInput || !caloriesInput) {
+    alert('Cannot find form inputs. Please check the form structure.');
+    return;
+  }
+  
+  const foodName = foodNameInput.value.trim();
+  const calories = parseFloat(caloriesInput.value) || 0;
+  
+  if (!foodName) {
     alert('Please enter a food name');
     return;
   }
-
-  // Add to meals array
-  meals.push({
+  
+  if (calories <= 0) {
+    alert('Please enter valid calories');
+    return;
+  }
+  
+  // Get macro values - try multiple methods to find the inputs
+  let protein = 0;
+  let carbs = 0;
+  let fats = 0;
+  
+  // Method 1: Try by ID
+  const proteinInput = document.getElementById('protein');
+  const carbsInput = document.getElementById('carbs');
+  const fatsInput = document.getElementById('fats');
+  
+  if (proteinInput) protein = parseFloat(proteinInput.value) || 0;
+  if (carbsInput) carbs = parseFloat(carbsInput.value) || 0;
+  if (fatsInput) fats = parseFloat(fatsInput.value) || 0;
+  
+  // Method 2: Try by form structure and labels
+  if (protein === 0 && carbs === 0 && fats === 0) {
+    const allInputs = document.querySelectorAll('.add-food-form input[type="number"]');
+    
+    // Look for inputs after the calories input
+    let foundCalories = false;
+    let macroIndex = 0;
+    
+    for (let input of allInputs) {
+      if (input === caloriesInput) {
+        foundCalories = true;
+        continue;
+      }
+      
+      if (foundCalories) {
+        const value = parseFloat(input.value) || 0;
+        if (macroIndex === 0) protein = value;
+        else if (macroIndex === 1) carbs = value;
+        else if (macroIndex === 2) fats = value;
+        macroIndex++;
+      }
+    }
+  }
+  
+  // Method 3: Try by looking for labels
+  if (protein === 0 && carbs === 0 && fats === 0) {
+    const labels = document.querySelectorAll('.add-food-form label');
+    labels.forEach(label => {
+      const text = label.textContent.toLowerCase();
+      const input = label.nextElementSibling;
+      
+      if (input && input.tagName === 'INPUT') {
+        const value = parseFloat(input.value) || 0;
+        if (text.includes('protein')) protein = value;
+        else if (text.includes('carb')) carbs = value;
+        else if (text.includes('fat')) fats = value;
+      }
+    });
+  }
+  
+  // Create meal object
+  const meal = {
+    id: Date.now(),
     name: foodName,
     calories: calories,
     protein: protein,
     carbs: carbs,
-    fats: fats
-  });
-
-  // Update totals
-  totals.calories += calories;
-  totals.protein += protein;
-  totals.carbs += carbs;
-  totals.fats += fats;
-
-  // Clear form
-  document.getElementById('foodName').value = '';
-  document.getElementById('calories').value = '';
-  document.getElementById('protein').value = '';
-  document.getElementById('carbs').value = '';
-  document.getElementById('fats').value = '';
-
-  // Update display
+    fats: fats,
+    timestamp: new Date().toISOString()
+  };
+  
+  // Add meal to daily data
+  dailyData.meals.push(meal);
+  
+  // Update consumed totals
+  dailyData.consumed.calories += calories;
+  dailyData.consumed.protein += protein;
+  dailyData.consumed.carbs += carbs;
+  dailyData.consumed.fats += fats;
+  
+  // Save data and update display
+  saveDailyData();
   updateDisplay();
+  clearForm();
+  
+  // Show success feedback
+  showNotification('Food added successfully!');
 }
 
-// Update display
+function deleteFood(mealId) {
+  const mealIndex = dailyData.meals.findIndex(meal => meal.id === mealId);
+  if (mealIndex === -1) return;
+  
+  const meal = dailyData.meals[mealIndex];
+  
+  // Remove from consumed totals
+  dailyData.consumed.calories -= meal.calories;
+  dailyData.consumed.protein -= meal.protein;
+  dailyData.consumed.carbs -= meal.carbs;
+  dailyData.consumed.fats -= meal.fats;
+  
+  // Remove from meals array
+  dailyData.meals.splice(mealIndex, 1);
+  
+  // Save data and update display
+  saveDailyData();
+  updateDisplay();
+  
+  showNotification('Food removed successfully!');
+}
+
+function clearForm() {
+  // Clear by ID
+  const inputs = ['foodName', 'calories', 'protein', 'carbs', 'fats'];
+  inputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.value = '';
+  });
+  
+  // Clear by form structure
+  const formInputs = document.querySelectorAll('.add-food-form input');
+  formInputs.forEach(input => {
+    if (input.type === 'text' || input.type === 'number') {
+      input.value = '';
+    }
+  });
+}
+
+// Display update functions
 function updateDisplay() {
-  // Update calories
-  document.getElementById('consumedCalories').textContent = totals.calories;
-  document.getElementById('remainingCalories').textContent = Math.max(0, goals.calories - totals.calories);
-
-  // Update macros
-  document.getElementById('consumedProtein').textContent = totals.protein;
-  document.getElementById('remainingProtein').textContent = Math.max(0, goals.protein - totals.protein);
-  document.getElementById('consumedCarbs').textContent = totals.carbs;
-  document.getElementById('remainingCarbs').textContent = Math.max(0, goals.carbs - totals.carbs);
-  document.getElementById('consumedFats').textContent = totals.fats;
-  document.getElementById('remainingFats').textContent = Math.max(0, goals.fats - totals.fats);
-
-  // Update progress bars
-  updateProgressBar('proteinProgress', totals.protein, goals.protein);
-  updateProgressBar('carbsProgress', totals.carbs, goals.carbs);
-  updateProgressBar('fatsProgress', totals.fats, goals.fats);
-
-  // Update meals list
+  updateCaloriesDisplay();
+  updateMacrosDisplay();
   updateMealsList();
+  updateQuickStats();
+  updateSummaryStats();
 }
 
-// Update progress bar
-function updateProgressBar(elementId, current, goal) {
-  const percentage = Math.min((current / goal) * 100, 100);
-  document.getElementById(elementId).style.width = percentage + '%';
+function updateCaloriesDisplay() {
+  const consumed = Math.round(dailyData.consumed.calories);
+  const goal = dailyData.goals.calories;
+  const remaining = Math.max(0, goal - consumed);
+  
+  const consumedElement = document.getElementById('consumedCalories');
+  const goalElement = document.getElementById('calorieGoal');
+  const remainingElement = document.getElementById('remainingCalories');
+  
+  if (consumedElement) consumedElement.textContent = consumed;
+  if (goalElement) goalElement.textContent = goal;
+  if (remainingElement) remainingElement.textContent = remaining;
 }
 
-// Update meals list
+function updateMacrosDisplay() {
+  // Update protein
+  const proteinConsumed = Math.round(dailyData.consumed.protein);
+  const proteinGoal = dailyData.goals.protein;
+  const proteinRemaining = Math.max(0, proteinGoal - proteinConsumed);
+  const proteinProgress = Math.min(100, (proteinConsumed / proteinGoal) * 100);
+  
+  const proteinConsumedEl = document.getElementById('consumedProtein');
+  const proteinRemainingEl = document.getElementById('remainingProtein');
+  const proteinProgressEl = document.getElementById('proteinProgress');
+  
+  if (proteinConsumedEl) proteinConsumedEl.textContent = proteinConsumed;
+  if (proteinRemainingEl) proteinRemainingEl.textContent = proteinRemaining;
+  if (proteinProgressEl) proteinProgressEl.style.width = proteinProgress + '%';
+  
+  // Update carbs
+  const carbsConsumed = Math.round(dailyData.consumed.carbs);
+  const carbsGoal = dailyData.goals.carbs;
+  const carbsRemaining = Math.max(0, carbsGoal - carbsConsumed);
+  const carbsProgress = Math.min(100, (carbsConsumed / carbsGoal) * 100);
+  
+  const carbsConsumedEl = document.getElementById('consumedCarbs');
+  const carbsRemainingEl = document.getElementById('remainingCarbs');
+  const carbsProgressEl = document.getElementById('carbsProgress');
+  
+  if (carbsConsumedEl) carbsConsumedEl.textContent = carbsConsumed;
+  if (carbsRemainingEl) carbsRemainingEl.textContent = carbsRemaining;
+  if (carbsProgressEl) carbsProgressEl.style.width = carbsProgress + '%';
+  
+  // Update fats
+  const fatsConsumed = Math.round(dailyData.consumed.fats);
+  const fatsGoal = dailyData.goals.fats;
+  const fatsRemaining = Math.max(0, fatsGoal - fatsConsumed);
+  const fatsProgress = Math.min(100, (fatsConsumed / fatsGoal) * 100);
+  
+  const fatsConsumedEl = document.getElementById('consumedFats');
+  const fatsRemainingEl = document.getElementById('remainingFats');
+  const fatsProgressEl = document.getElementById('fatsProgress');
+  
+  if (fatsConsumedEl) fatsConsumedEl.textContent = fatsConsumed;
+  if (fatsRemainingEl) fatsRemainingEl.textContent = fatsRemaining;
+  if (fatsProgressEl) fatsProgressEl.style.width = fatsProgress + '%';
+}
+
 function updateMealsList() {
   const mealsList = document.getElementById('mealsList');
+  if (!mealsList) return;
   
-  if (meals.length === 0) {
+  if (dailyData.meals.length === 0) {
     mealsList.innerHTML = `
       <div class="empty-state">
         <p>No meals added yet</p>
@@ -129,60 +294,188 @@ function updateMealsList() {
     `;
     return;
   }
-
-  mealsList.innerHTML = meals.map((meal, index) => `
+  
+  mealsList.innerHTML = dailyData.meals.map(meal => `
     <div class="meal-item">
       <div class="meal-info">
         <div class="meal-name">${meal.name}</div>
         <div class="meal-macros">
-          P: ${meal.protein}g • C: ${meal.carbs}g • F: ${meal.fats}g
+          P: ${Math.round(meal.protein)}g • C: ${Math.round(meal.carbs)}g • F: ${Math.round(meal.fats)}g
         </div>
       </div>
-      <div style="display: flex; align-items: center;">
-        <div class="meal-calories">${meal.calories} cal</div>
-        <button class="delete-btn" onclick="deleteMeal(${index})">Delete</button>
-      </div>
+      <div class="meal-calories">${Math.round(meal.calories)} cal</div>
+      <button class="delete-btn" onclick="deleteFood(${meal.id})">Delete</button>
     </div>
   `).join('');
 }
 
-// Delete meal
-function deleteMeal(index) {
-  const meal = meals[index];
+function updateQuickStats() {
+  const totalMeals = dailyData.meals.length;
+  const calorieProgress = Math.round((dailyData.consumed.calories / dailyData.goals.calories) * 100);
+  const streakDays = calculateStreak();
   
-  // Subtract from totals
-  totals.calories -= meal.calories;
-  totals.protein -= meal.protein;
-  totals.carbs -= meal.carbs;
-  totals.fats -= meal.fats;
-
-  // Remove from meals array
-  meals.splice(index, 1);
-
-  // Update display
-  updateDisplay();
+  const totalMealsEl = document.getElementById('totalMeals');
+  const calorieProgressEl = document.getElementById('calorieProgress');
+  const streakDaysEl = document.getElementById('streakDays');
+  
+  if (totalMealsEl) totalMealsEl.textContent = totalMeals;
+  if (calorieProgressEl) calorieProgressEl.textContent = calorieProgress + '%';
+  if (streakDaysEl) streakDaysEl.textContent = streakDays;
 }
 
-// Update progress (for checklist)
-function updateProgress() {
-  const checkboxes = document.querySelectorAll('.day-checkbox input[type="checkbox"]');
-  const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
-  document.getElementById('daysCompleted').textContent = completed;
+function updateSummaryStats() {
+  const summaryCaloriesEl = document.getElementById('summaryCalories');
+  const summaryProteinEl = document.getElementById('summaryProtein');
+  const summaryCarbsEl = document.getElementById('summaryCarbs');
+  const summaryFatsEl = document.getElementById('summaryFats');
+  
+  if (summaryCaloriesEl) summaryCaloriesEl.textContent = Math.round(dailyData.consumed.calories);
+  if (summaryProteinEl) summaryProteinEl.textContent = Math.round(dailyData.consumed.protein) + 'g';
+  if (summaryCarbsEl) summaryCarbsEl.textContent = Math.round(dailyData.consumed.carbs) + 'g';
+  if (summaryFatsEl) summaryFatsEl.textContent = Math.round(dailyData.consumed.fats) + 'g';
 }
 
-// Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-  initializeChecklist();
-  updateDisplay();
+// Progress tracking functions
+function generateChecklistDays() {
+  const checklistGrid = document.querySelector('.checklist-grid');
+  if (!checklistGrid) return;
+  
+  checklistGrid.innerHTML = '';
+  
+  for (let i = 1; i <= 30; i++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day-checkbox';
+    
+    const today = new Date();
+    const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+    const isChecked = monthlyProgress[dateKey] || false;
+    
+    dayDiv.innerHTML = `
+      <input type="checkbox" id="day${i}" ${isChecked ? 'checked' : ''} onchange="toggleDay(${i})">
+      <label for="day${i}">${i}</label>
+    `;
+    
+    checklistGrid.appendChild(dayDiv);
+  }
+}
+
+function toggleDay(day) {
+  const today = new Date();
+  const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  
+  const checkbox = document.getElementById(`day${day}`);
+  if (checkbox) {
+    monthlyProgress[dateKey] = checkbox.checked;
+    
+    if (isLocalStorageAvailable) {
+      localStorage.setItem('monthlyProgress', JSON.stringify(monthlyProgress));
+    }
+    updateProgressStats();
+  }
+}
+
+function updateProgressStats() {
+  const completedDays = Object.values(monthlyProgress).filter(Boolean).length;
+  const daysCompletedEl = document.getElementById('daysCompleted');
+  if (daysCompletedEl) daysCompletedEl.textContent = completedDays;
+}
+
+function calculateStreak() {
+  const today = new Date();
+  let streak = 0;
+  
+  for (let i = 0; i < 30; i++) {
+    const checkDate = new Date(today);
+    checkDate.setDate(today.getDate() - i);
+    
+    const dateKey = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+    
+    if (monthlyProgress[dateKey]) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  
+  return streak;
+}
+
+// Data persistence functions
+function saveDailyData() {
+  if (!isLocalStorageAvailable) return;
+  
+  const today = new Date().toDateString();
+  localStorage.setItem(`dailyData_${today}`, JSON.stringify(dailyData));
+}
+
+function loadDailyData() {
+  if (!isLocalStorageAvailable) return;
+  
+  const today = new Date().toDateString();
+  const savedData = localStorage.getItem(`dailyData_${today}`);
+  
+  if (savedData) {
+    dailyData = JSON.parse(savedData);
+  }
+}
+
+// Utility functions
+function showNotification(message) {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #48bb78;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    font-weight: 600;
+    font-size: 14px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Show notification
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 100);
+  
+  // Hide notification after 3 seconds
+  setTimeout(() => {
+    notification.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// Auto-save functionality
+if (isLocalStorageAvailable) {
+  setInterval(saveDailyData, 30000); // Save every 30 seconds
+}
+
+// Handle form submission with Enter key
+document.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+    const form = e.target.closest('.add-food-form');
+    if (form) {
+      addFood();
+    }
+  }
 });
 
-// Also initialize immediately in case DOMContentLoaded has already fired
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
-    initializeChecklist();
-    updateDisplay();
-  });
-} else {
-  initializeChecklist();
-  updateDisplay();
-}
+// Make functions globally available
+window.showSection = showSection;
+window.addFood = addFood;
+window.deleteFood = deleteFood;
+window.toggleDay = toggleDay;
