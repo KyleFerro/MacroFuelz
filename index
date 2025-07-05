@@ -9,120 +9,175 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>MacroFuel</h1>
-      <p>Track your nutrition goals</p>
+      <div class="header-left">
+        <h1>MacroFuel</h1>
+        <p>Professional Nutrition Tracking</p>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="totalMeals">0</div>
+            <div class="quick-stat-label">Meals Today</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="showSection('tracker')">Tracker</button>
-      <button class="nav-tab" onclick="showSection('checklist')">Progress</button>
+      <button class="nav-tab active" onclick="showSection('tracker')">Daily Tracker</button>
+      <button class="nav-tab" onclick="showSection('progress')">Monthly Progress</button>
     </div>
 
     <div class="section active" id="tracker">
-      <div class="calories-summary">
-        <h2>Daily Calories</h2>
-        <div class="calories-display">
-          <span id="consumedCalories">0</span> / <span id="calorieGoal">2000</span>
-        </div>
-        <div class="calories-remaining">
-          <span id="remainingCalories">2000</span> calories remaining
-        </div>
-      </div>
+      <div class="main-content">
+        <div class="left-panel">
+          <div class="calories-summary">
+            <h2>Daily Calories</h2>
+            <div class="calories-display">
+              <span id="consumedCalories">0</span> / <span id="calorieGoal">2000</span>
+            </div>
+            <div class="calories-remaining">
+              <span id="remainingCalories">2000</span> calories remaining
+            </div>
+          </div>
 
-      <div class="macros-grid">
-        <div class="macro-card protein">
-          <div class="macro-label">Protein</div>
-          <div class="macro-value">
-            <span id="consumedProtein">0</span>g
+          <div class="macros-grid">
+            <div class="macro-card protein">
+              <div class="macro-label">Protein</div>
+              <div class="macro-value">
+                <span id="consumedProtein">0</span>g
+              </div>
+              <div class="macro-remaining">
+                <span id="remainingProtein">150</span>g remaining
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="proteinProgress"></div>
+              </div>
+            </div>
+
+            <div class="macro-card carbs">
+              <div class="macro-label">Carbs</div>
+              <div class="macro-value">
+                <span id="consumedCarbs">0</span>g
+              </div>
+              <div class="macro-remaining">
+                <span id="remainingCarbs">250</span>g remaining
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="carbsProgress"></div>
+              </div>
+            </div>
+
+            <div class="macro-card fats">
+              <div class="macro-label">Fats</div>
+              <div class="macro-value">
+                <span id="consumedFats">0</span>g
+              </div>
+              <div class="macro-remaining">
+                <span id="remainingFats">67</span>g remaining
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="fatsProgress"></div>
+              </div>
+            </div>
           </div>
-          <div class="macro-remaining">
-            <span id="remainingProtein">150</span>g left
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="proteinProgress"></div>
+
+          <div class="meals-list">
+            <h3>Today's Meals</h3>
+            <div id="mealsList">
+              <div class="empty-state">
+                <p>No meals added yet</p>
+                <p>Add your first meal using the form on the right!</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="macro-card carbs">
-          <div class="macro-label">Carbs</div>
-          <div class="macro-value">
-            <span id="consumedCarbs">0</span>g
+        <div class="right-panel">
+          <div class="daily-summary">
+            <h3>Daily Summary</h3>
+            <div class="summary-stats">
+              <div class="summary-stat">
+                <div class="summary-stat-value" id="summaryCalories">0</div>
+                <div class="summary-stat-label">Total Calories</div>
+              </div>
+              <div class="summary-stat">
+                <div class="summary-stat-value" id="summaryProtein">0g</div>
+                <div class="summary-stat-label">Protein</div>
+              </div>
+              <div class="summary-stat">
+                <div class="summary-stat-value" id="summaryCarbs">0g</div>
+                <div class="summary-stat-label">Carbs</div>
+              </div>
+              <div class="summary-stat">
+                <div class="summary-stat-value" id="summaryFats">0g</div>
+                <div class="summary-stat-label">Fats</div>
+              </div>
+            </div>
           </div>
-          <div class="macro-remaining">
-            <span id="remainingCarbs">250</span>g left
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="carbsProgress"></div>
-          </div>
-        </div>
 
-        <div class="macro-card fats">
-          <div class="macro-label">Fats</div>
-          <div class="macro-value">
-            <span id="consumedFats">0</span>g
-          </div>
-          <div class="macro-remaining">
-            <span id="remainingFats">67</span>g left
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="fatsProgress"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="add-food-form">
-        <h3>Add Food</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Food Name</label>
-            <input type="text" id="foodName" placeholder="e.g., Chicken Breast">
-          </div>
-          <div class="form-group">
-            <label>Calories</label>
-            <input type="number" id="calories" placeholder="0">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Protein (g)</label>
-            <input type="number" id="protein" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Carbs (g)</label>
-            <input type="number" id="carbs" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Fats (g)</label>
-            <input type="number" id="fats" placeholder="0">
-          </div>
-        </div>
-        <button class="add-btn" onclick="addFood()">Add Food</button>
-      </div>
-
-      <div class="meals-list">
-        <h3>Today's Meals</h3>
-        <div id="mealsList">
-          <div class="empty-state">
-            <p>No meals added yet</p>
-            <p>Add your first meal above!</p>
+          <div class="add-food-form">
+            <h3>Add Food</h3>
+            <div class="form-grid">
+              <div class="form-left">
+                <div class="form-group">
+                  <label>Food Name</label>
+                  <input type="text" id="foodName" placeholder="e.g., Grilled Chicken Breast">
+                </div>
+                <div class="form-group">
+                  <label>Calories</label>
+                  <input type="number" id="calories" placeholder="0">
+                </div>
+              </div>
+              <div class="form-right">
+                <div class="macro-inputs">
+                  <div class="form-group">
+                    <label>Protein (g)</label>
+                    <input type="number" id="protein" placeholder="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Carbs (g)</label>
+                    <input type="number" id="carbs" placeholder="0">
+                  </div>
+                  <div class="form-group">
+                    <label>Fats (g)</label>
+                    <input type="number" id="fats" placeholder="0">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="add-btn" onclick="addFood()">Add Food</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="section" id="checklist">
-      <div class="progress-summary">
-        <h3>Monthly Progress</h3>
-        <div class="progress-stat">
-          <span id="daysCompleted">0</span> / 30 days
+    <div class="section" id="progress">
+      <div class="progress-section">
+        <div class="progress-summary">
+          <h3>Monthly Progress</h3>
+          <div class="progress-stat">
+            <span id="daysCompleted">0</span> / 30
+          </div>
+          <div class="progress-description">
+            Days you've met your calorie goal
+          </div>
         </div>
-        <p style="margin-top: 10px; font-size: 14px; color: #718096;">
-          Days you've met your calorie goal
-        </p>
-      </div>
 
-      <div class="checklist-grid">
-        <!-- Days will be generated by JavaScript -->
+        <div class="checklist-container">
+          <h3>Daily Goal Tracker</h3>
+          <div class="checklist-grid">
+            <!-- Days will be generated by JavaScript -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
