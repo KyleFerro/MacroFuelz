@@ -129,6 +129,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 30px;
+  margin-right: 20px;
 }
 
 .calories-summary {
@@ -168,7 +169,7 @@ body {
   background: white;
   border: 3px solid #e2e8f0;
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
@@ -254,7 +255,7 @@ body {
 .add-food-form {
   background: #f7fafc;
   border-radius: 20px;
-  padding: 30px;
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -285,7 +286,7 @@ body {
 }
 
 .form-group {
-  display: flex;
+  display: -webkit-inline-flex;
   flex-direction: column;
 }
 
@@ -299,10 +300,10 @@ body {
 }
 
 .form-group input {
-  padding: 14px;
+  padding: 10px;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 10px;
   transition: border-color 0.3s ease;
 }
 
@@ -312,7 +313,7 @@ body {
 }
 
 .macro-inputs {
-  display: grid;
+  display: table-column;
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
 }
