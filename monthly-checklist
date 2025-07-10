@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Monthly Progress</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><img src="https://i.ibb.co/vzR0F9B/home-icon.png" alt="Home Icon"> Daily Tracker</a></li>
+      <li><a href="monthly-checklist.html"><img src="https://i.ibb.co/Vvz0B6k/calendar-icon.png" alt="Calendar Icon"> Monthly Progress</a></li>
+      <li><a href="#"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="#"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>
+    </ul>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h1>MacroFuel</h1>
+          <p>Professional Nutrition Tracking</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="totalMeals">0</div>
+            <div class="quick-stat-label">Meals Today</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettingsPanel()">
+          <img src="https://i.ibb.co/z5p5DkK/settings-cog.png" alt="Settings Icon">
+        </button>
+        <button class="account-btn">
+          <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
+        </button>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab" id="navDailyTracker">Daily Tracker</a>
+      <a href="monthly-checklist.html" class="nav-tab" id="navMonthlyProgress">Monthly Progress</a>
+      <a href="#" class="nav-tab" id="navDayChosen" style="display: none;"></a>
+    </div>
+
+    <div class="progress-section-content" id="progress">
+      <div class="monthly-checklist-header">
+        <button class="month-nav-btn" onclick="changeMonth(-1)">Previous Month</button>
+        <h2 id="currentMonthYear"></h2>
+        <button class="month-nav-btn" onclick="changeMonth(1)">Next Month</button>
+      </div>
+
+      <div class="checklist-container">
+        <h3>Daily Goal Tracker</h3>
+        <div class="checklist-grid">
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
