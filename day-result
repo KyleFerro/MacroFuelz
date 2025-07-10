@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Daily Result</title>
+  <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><img src="https://i.ibb.co/vzR0F9B/home-icon.png" alt="Home Icon"> Daily Tracker</a></li>
+      <li><a href="monthly-checklist.html"><img src="https://i.ibb.co/Vvz0B6k/calendar-icon.png" alt="Calendar Icon"> Monthly Progress</a></li>
+      <li><a href="#"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="#"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>
+      </ul>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h1>MacroFuel</h1>
+          <p>Professional Nutrition Tracking</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="totalMeals">0</div>
+            <div class="quick-stat-label">Meals Today</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettingsPanel()">
+          <img src="https://i.ibb.co/z5p5DkK/settings-cog.png" alt="Settings Icon">
+        </button>
+        <button class="account-btn">
+          <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
+        </button>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab active">Daily Tracker</a>
+      <a href="monthly-checklist.html" class="nav-tab">Monthly Progress</a>
+    </div>
+
+    <div class="section active" id="dayResult">
+      <div class="day-result-content">
+        <button class="back-btn" onclick="window.location.href='monthly-checklist.html'">&leftarrow; Back to Monthly Progress</button>
+        <h2 id="resultDate"></h2> <div class="result-summary">
+          <div class="result-item">
+            <span class="result-label">Calorie Count:</span>
+            <span class="result-value" id="resultCalories">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Protein:</span>
+            <span class="result-value" id="resultProtein">0g</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Carbs:</span>
+            <span class="result-value" id="resultCarbs">0g</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Fats:</span>
+            <span class="result-value" id="resultFats">0g</span>
+          </div>
+          <div class="result-item ai-suggested">
+            <span class="result-label">A.I Suggested Meals!:</span>
+            <span class="result-value" id="aiSuggestedMeals"></span>
+          </div>
+        </div>
+        <div class="result-meals-list" id="resultMealsList">
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Specific initialization for the day result page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAllData(); // Load all historical data
+      updateQuickStats(); // Update quick stats from any page
+
+      // Get the date key from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const dateKey = urlParams.get('date');
+      if (dateKey) {
+        displayDayResult(dateKey); // Call displayDayResult instead of showDayResult
+      } else {
+        // Redirect if no date is provided
+        window.location.href = 'monthly-checklist.html';
+      }
+    });
+  </script>
+</body>
+</html>
