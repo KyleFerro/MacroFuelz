@@ -16,8 +16,7 @@
       <li><a href="index.html"><img src="https://i.ibb.co/vzR0F9B/home-icon.png" alt="Home Icon"> Daily Tracker</a></li>
       <li><a href="monthly-checklist.html"><img src="https://i.ibb.co/Vvz0B6k/calendar-icon.png" alt="Calendar Icon"> Monthly Progress</a></li>
       <li><a href="#"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
-      <li><a href="#"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>
-      </ul>
+      <li><a href="medical.html" id="sidebarMedical"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>      </ul>
   </div>
 
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -49,9 +48,9 @@
         <button class="settings-btn" onclick="toggleSettingsPanel()">
           <img src="https://i.ibb.co/z5p5DkK/settings-cog.png" alt="Settings Icon">
         </button>
-        <button class="account-btn">
-          <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
-        </button>
+        <a href="medical.html" class="account-btn">
+  <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
+</a>
       </div>
     </div>
 
