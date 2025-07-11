@@ -15,9 +15,8 @@
     <ul class="sidebar-menu">
       <li><a href="index.html"><img src="https://i.ibb.co/vzR0F9B/home-icon.png" alt="Home Icon"> Daily Tracker</a></li>
       <li><a href="monthly-checklist.html"><img src="https://i.ibb.co/Vvz0B6k/calendar-icon.png" alt="Calendar Icon"> Monthly Progress</a></li>
-      <li><a href="#"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
-      <li><a href="#"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>
-      </ul>
+      <li><a href="subscriptions.html"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="medical.html" id="sidebarMedical"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>      </ul>
   </div>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
@@ -48,121 +47,125 @@
         <button class="settings-btn" onclick="toggleSettingsPanel()">
           <img src="https://i.ibb.co/z5p5DkK/settings-cog.png" alt="Settings Icon">
         </button>
-        <button class="account-btn">
-          <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
-        </button>
+        <a href="medical.html" class="account-btn">
+  <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
+</a>
       </div>
     </div>
 
     <div class="nav-tabs">
       <a href="index.html" class="nav-tab" id="navDailyTracker">Daily Tracker</a>
       <a href="monthly-checklist.html" class="nav-tab" id="navMonthlyProgress">Monthly Progress</a>
+      <a href="subscriptions.html" class="nav-tab" id="navSubscriptions">Subscriptions</a>
       <a href="#" class="nav-tab" id="navDayChosen" style="display: none;"></a>
     </div>
 
-    <div class="section active" id="tracker">
-      <div class="main-content">
-        <div class="left-panel">
-          <div class="calories-summary">
-            <h2>Today's Calories</h2>
-            <div class="calories-display"><span id="consumedCalories">0</span> / <span id="calorieGoal">2000</span> cal</div>
-            <p class="calories-remaining"><span id="remainingCalories">2000</span> cal remaining</p>
+    <div class="main-content" id="tracker">
+      <div class="left-panel">
+        <div class="calories-summary">
+          <h2>Calories Remaining</h2>
+          <div class="calories-display">
+            <span id="consumedCalories">0</span>/<span id="calorieGoal">0</span>
           </div>
+          <p class="calories-remaining" id="remainingCalories">0 remaining</p>
+        </div>
 
-          <div class="macros-grid">
-            <div class="macro-card protein">
-              <div class="macro-label">Protein</div>
-              <div class="macro-value"><span id="consumedProtein">0</span>g</div>
-              <div class="macro-remaining"><span id="remainingProtein">150</span>g remaining</div>
-              <div class="progress-bar"><div class="progress-fill" id="proteinProgress"></div></div>
-            </div>
-            <div class="macro-card carbs">
-              <div class="macro-label">Carbs</div>
-              <div class="macro-value"><span id="consumedCarbs">0</span>g</div>
-              <div class="macro-remaining"><span id="remainingCarbs">250</span>g remaining</div>
-              <div class="progress-bar"><div class="progress-fill" id="carbsProgress"></div></div>
-            </div>
-            <div class="macro-card fats">
-              <div class="macro-label">Fats</div>
-              <div class="macro-value"><span id="consumedFats">0</span>g</div>
-              <div class="macro-remaining"><span id="remainingFats">67</span>g remaining</div>
-              <div class="progress-bar"><div class="progress-fill" id="fatsProgress"></div></div>
+        <div class="macros-grid">
+          <div class="macro-card protein">
+            <div class="macro-label">Protein</div>
+            <div class="macro-value" id="consumedProtein">0g</div>
+            <div class="macro-remaining" id="remainingProtein">0g remaining</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="proteinProgress" style="width: 0%;"></div>
             </div>
           </div>
-
-          <div class="meals-list" id="mealsList">
-            <h3>Today's Meals</h3>
+          <div class="macro-card carbs">
+            <div class="macro-label">Carbs</div>
+            <div class="macro-value" id="consumedCarbs">0g</div>
+            <div class="macro-remaining" id="remainingCarbs">0g remaining</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="carbsProgress" style="width: 0%;"></div>
             </div>
-          <div class="meal-list-actions">
-            <button class="action-btn clear-meals-btn" onclick="clearAllMeals()">Clear All Meals</button>
-            <button class="action-btn save-data-btn" onclick="saveDailyDataForToday()">Save Daily Data</button>
+          </div>
+          <div class="macro-card fats">
+            <div class="macro-label">Fats</div>
+            <div class="macro-value" id="consumedFats">0g</div>
+            <div class="macro-remaining" id="remainingFats">0g remaining</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="fatsProgress" style="width: 0%;"></div>
+            </div>
           </div>
         </div>
 
-        <div class="right-panel">
-          <div class="add-food-form">
-            <h3>Add Food</h3>
-            <div class="form-grid">
-              <div class="form-left">
-                <div class="form-group">
-                  <label for="foodName">Food Name</label>
-                  <input type="text" id="foodName" placeholder="e.g., Chicken Breast">
-                </div>
-                <div class="form-group">
-                  <label for="calories">Calories (kcal)</label>
-                  <input type="number" id="calories" placeholder="0">
-                </div>
-              </div>
-              <div class="form-right">
-                <div class="macro-inputs">
-                  <div class="form-group">
-                    <label>Protein (g)</label>
-                    <input type="number" id="protein" placeholder="0">
-                  </div>
-                  <div class="form-group">
-                    <label>Carbs (g)</label>
-                    <input type="number" id="carbs" placeholder="0">
-                  </div>
-                  <div class="form-group">
-                    <label>Fats (g)</label>
-                    <input type="number" id="fats" placeholder="0">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <button class="add-btn" onclick="addFood()">Add Food</button>
+        <div class="meals-list" id="mealsList">
+          <h3>Today's Meals</h3>
           </div>
+        <button class="clear-meals-btn" onclick="clearAllMeals()">Clear All Meals</button>
+      </div>
 
-          <div class="settings-panel" id="settingsPanel">
-            <h3>Set Daily Goals</h3>
-            <div class="form-grid">
-              <div class="form-left">
-                <div class="form-group">
-                  <label for="goalCalories">Calories (kcal)</label>
-                  <input type="number" id="goalCalories" placeholder="2000">
-                </div>
+      <div class="right-panel">
+        <div class="add-food-form">
+          <h3>Add Food Entry</h3>
+          <div class="form-group">
+            <label for="foodName">Food Name</label>
+            <input type="text" id="foodName" placeholder="e.g., Chicken Breast">
+          </div>
+          <div class="form-grid">
+            <div class="form-left">
+              <div class="form-group">
+                <label for="calories">Calories (kcal)</label>
+                <input type="number" id="calories" placeholder="300">
               </div>
-              <div class="form-right">
-                <div class="macro-inputs">
-                  <div class="form-group">
-                    <label for="goalProtein">Protein (g)</label>
-                    <input type="number" id="goalProtein" placeholder="150">
-                  </div>
-                  <div class="form-group">
-                    <label for="goalCarbs">Carbs (g)</label>
-                    <input type="number" id="goalCarbs" placeholder="250">
-                  </div>
-                  <div class="form-group">
-                    <label for="goalFats">Fats (g)</label>
-                    <input type="number" id="goalFats" placeholder="67">
-                  </div>
+            </div>
+            <div class="form-right">
+              <div class="macro-inputs">
+                <div class="form-group">
+                  <label for="protein">Protein (g)</label>
+                  <input type="number" id="protein" placeholder="30">
+                </div>
+                <div class="form-group">
+                  <label for="carbs">Carbs (g)</label>
+                  <input type="number" id="carbs" placeholder="20">
+                </div>
+                <div class="form-group">
+                  <label for="fats">Fats (g)</label>
+                  <input type="number" id="fats" placeholder="10">
                 </div>
               </div>
             </div>
-            <button class="add-btn" onclick="setDailyGoals()">Save Goals</button>
           </div>
-          
+          <button class="add-btn" onclick="addFood()">Add Food</button>
         </div>
+
+        <div class="settings-panel" id="settingsPanel">
+          <h3>Set Daily Goals</h3>
+          <div class="form-grid">
+            <div class="form-left">
+              <div class="form-group">
+                <label for="goalCalories">Calories (kcal)</label>
+                <input type="number" id="goalCalories" placeholder="2000">
+              </div>
+            </div>
+            <div class="form-right">
+              <div class="macro-inputs">
+                <div class="form-group">
+                  <label for="goalProtein">Protein (g)</label>
+                  <input type="number" id="goalProtein" placeholder="150">
+                </div>
+                <div class="form-group">
+                  <label for="goalCarbs">Carbs (g)</label>
+                  <input type="number" id="goalCarbs" placeholder="250">
+                </div>
+                <div class="form-group">
+                  <label for="goalFats">Fats (g)</label>
+                  <input type="number" id="goalFats" placeholder="67">
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="add-btn" onclick="setDailyGoals()">Save Goals</button>
+        </div>
+        
       </div>
     </div>
   </div>
