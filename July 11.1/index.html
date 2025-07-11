@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Nutrition Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><img src="daily tracker.png" alt="Daily Tracker Icon"> Daily Tracker</a></li>
+      <li><a href="monthly-checklist.html"><img src="monthly checklist.png" alt="Monthly Progress Icon"> Monthly Progress</a></li>
+      <li><a href="subscriptions.html"><img src="subscription.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="medical.html" id="sidebarMedical"><img src="medical.png" alt="Medical Icon"> Medical</a></li>
+      <li><a href="account.html" id="sidebarAccount"><img src="account.png" alt="Account Icon"> Account</a></li>
+    </ul>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h1>MacroFuel</h1>
+        <p>Stay on track with your nutrition goals</p>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettingsPanel()">
+          <img src="settings.png" alt="Settings Icon">
+        </button>
+        <a href="account.html" class="account-btn">
+          <img src="account.png" alt="Account Icon">
+        </a>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab" id="navDailyTracker">Daily Tracker</a>
+      <a href="monthly-checklist.html" class="nav-tab" id="navMonthlyProgress">Monthly Progress</a>
+      <a href="subscriptions.html" class="nav-tab" id="navSubscriptions">Subscription</a>
+      <a href="#" class="nav-tab" id="navDayChosen" style="display: none;"></a>
+    </div>
+
+    <div class="tracker-section-content" id="tracker">
+      <div class="daily-summary">
+        <div class="current-stats">
+          <div class="calories-display">
+            <span id="caloriesConsumed">0</span>/<span id="caloriesGoal">2000</span> kcal
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="calorieProgressBar"></div>
+          </div>
+          <div class="macros-grid">
+            <div class="macro-item">
+              <span class="macro-value" id="proteinConsumed">0</span>/<span id="proteinGoal">150</span>g
+              <span class="macro-label">Protein</span>
+            </div>
+            <div class="macro-item">
+              <span class="macro-value" id="carbsConsumed">0</span>/<span id="carbsGoal">250</span>g
+              <span class="macro-label">Carbs</span>
+            </div>
+            <div class="macro-item">
+              <span class="macro-value" id="fatsConsumed">0</span>/<span id="fatsGoal">67</span>g
+              <span class="macro-label">Fats</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-input-section">
+        <h2>Add Food</h2>
+        <div class="add-food-form">
+          <div class="form-group">
+            <label for="foodName">Food Name</label>
+            <input type="text" id="foodName" placeholder="e.g., Apple">
+          </div>
+          <div class="form-grid">
+            <div class="form-left">
+              <div class="form-group">
+                <label for="calories">Calories (kcal)</label>
+                <input type="number" id="calories" placeholder="100">
+              </div>
+            </div>
+            <div class="form-right">
+              <div class="macro-inputs">
+                <div class="form-group">
+                  <label for="protein">Protein (g)</label>
+                  <input type="number" id="protein" placeholder="10">
+                </div>
+                <div class="form-group">
+                  <label for="carbs">Carbs (g)</label>
+                  <input type="number" id="carbs" placeholder="20">
+                </div>
+                <div class="form-group">
+                  <label for="fats">Fats (g)</label>
+                  <input type="number" id="fats" placeholder="10">
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="add-btn" onclick="addFood()">Add Food</button>
+        </div>
+
+        <div class="settings-panel" id="settingsPanel">
+          <h3>Set Daily Goals</h3>
+          <div class="form-grid">
+            <div class="form-left">
+              <div class="form-group">
+                <label for="goalCalories">Calories (kcal)</label>
+                <input type="number" id="goalCalories" placeholder="2000">
+              </div>
+            </div>
+            <div class="form-right">
+              <div class="macro-inputs">
+                <div class="form-group">
+                  <label for="goalProtein">Protein (g)</label>
+                  <input type="number" id="goalProtein" placeholder="150">
+                </div>
+                <div class="form-group">
+                  <label for="goalCarbs">Carbs (g)</label>
+                  <input type="number" id="goalCarbs" placeholder="250">
+                </div>
+                <div class="form-group">
+                  <label for="goalFats">Fats (g)</label>
+                  <input type="number" id="goalFats" placeholder="67">
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="add-btn" onclick="setDailyGoals()">Save Goals</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Account Settings</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><img src="daily tracker.png" alt="Daily Tracker Icon"> Daily Tracker</a></li>
+      <li><a href="monthly-checklist.html"><img src="monthly checklist.png" alt="Monthly Progress Icon"> Monthly Progress</a></li>
+      <li><a href="subscriptions.html"><img src="subscription.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="medical.html" id="sidebarMedical"><img src="medical.png" alt="Medical Icon"> Medical</a></li>
+      <li><a href="account.html" id="sidebarAccount"><img src="account.png" alt="Account Icon"> Account</a></li>
+    </ul>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h1>MacroFuel</h1>
+        <p>Manage your account preferences</p>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="currentCalories">0</div>
+            <div class="quick-stat-label">kcal</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettingsPanel()">
+          <img src="settings.png" alt="Settings Icon">
+        </button>
+        <a href="account.html" class="account-btn">
+          <img src="account.png" alt="Account Icon">
+        </a>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab" id="navDailyTracker">Daily Tracker</a>
+      <a href="monthly-checklist.html" class="nav-tab" id="navMonthlyProgress">Monthly Progress</a>
+      <a href="subscriptions.html" class="nav-tab" id="navSubscriptions">Subscription</a>
+      <a href="#" class="nav-tab" id="navAccount">Account</a>
+    </div>
+
+    <div class="main-content">
+      <div class="account-section-content" id="account">
+        <h2>Account Settings</h2>
+
+        <div class="account-card profile-details-card">
+            <h3>Profile Details</h3>
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="john.doe@example.com">
+            </div>
+            <button class="save-btn" onclick="saveProfileDetails()">Save Profile</button>
+        </div>
+
+        <div class="account-card password-settings-card">
+            <h3>Password Settings</h3>
+            <div class="form-group">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword">
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword">
+            </div>
+            <div class="form-group">
+                <label for="confirmNewPassword">Confirm New Password</label>
+                <input type="password" id="confirmNewPassword">
+            </div>
+            <button class="save-btn" onclick="changePassword()">Change Password</button>
+        </div>
+
+        <div class="account-card preferences-settings-card">
+            <h3>Preferences</h3>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="emailNotifications">
+                <label for="emailNotifications">Receive email notifications</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="darkMode">
+                <label for="darkMode">Enable Dark Mode</label>
+            </div>
+            <button class="save-btn" onclick="savePreferences()">Save Preferences</button>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">Log Out</button>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Specific initialization for the account page
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAllData(); // Load all historical data
+        updateQuickStats(); // Update quick stats from any page
+        setActiveNavTab(); // Set active nav tab (sidebar link for this page)
+        loadAccountData(); // Load account specific data
+    });
+
+    function saveProfileDetails() {
+        const fullName = document.getElementById('fullName').value;
+        const email = document.getElementById('email').value;
+
+        if (fullName && email) {
+            // In a real application, you'd send this to a server
+            // For now, we'll simulate saving to localStorage
+            const accountData = getAccountData();
+            accountData.profile = { fullName, email };
+            saveAccountData(accountData);
+            showNotification('Profile details saved!', 'success');
+        } else {
+            showNotification('Please fill in all profile fields.', 'error');
+        }
+    }
+
+    function changePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+        if (currentPassword && newPassword && confirmNewPassword) {
+            if (newPassword !== confirmNewPassword) {
+                showNotification('New password and confirmation do not match.', 'error');
+                return;
+            }
+            // In a real application, you'd validate current password with server
+            // and then update password. For now, just clear fields.
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            showNotification('Password changed successfully!', 'success');
+        } else {
+            showNotification('Please fill in all password fields.', 'error');
+        }
+    }
+
+    function savePreferences() {
+        const emailNotifications = document.getElementById('emailNotifications').checked;
+        const darkMode = document.getElementById('darkMode').checked;
+
+        const accountData = getAccountData();
+        accountData.preferences = { emailNotifications, darkMode };
+        saveAccountData(accountData);
+        showNotification('Preferences saved!', 'success');
+
+        // Apply dark mode immediately if enabled
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }
+
+    function logout() {
+        // In a real application, this would clear session tokens and redirect to login
+        showNotification('Logged out successfully!', 'info');
+        // Simulate redirect
+        // window.location.href = 'login.html'; // Or your login page
+    }
+
+    function getAccountData() {
+        if (isLocalStorageAvailable) {
+            const storedData = localStorage.getItem('accountData');
+            return storedData ? JSON.parse(storedData) : { profile: {}, preferences: {} };
+        }
+        return { profile: {}, preferences: {} };
+    }
+
+    function saveAccountData(data) {
+        if (isLocalStorageAvailable) {
+            localStorage.setItem('accountData', JSON.stringify(data));
+        }
+    }
+
+    function loadAccountData() {
+        const accountData = getAccountData();
+        if (accountData.profile) {
+            document.getElementById('fullName').value = accountData.profile.fullName || '';
+            document.getElementById('email').value = accountData.profile.email || '';
+        }
+        if (accountData.preferences) {
+            document.getElementById('emailNotifications').checked = accountData.preferences.emailNotifications || false;
+            document.getElementById('darkMode').checked = accountData.preferences.darkMode || false;
+            // Apply dark mode on load
+            if (accountData.preferences.darkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+    }
+
+    // Temporary notification function (can be improved with a dedicated notification system)
+    function showNotification(message, type) {
+        alert(`${type.toUpperCase()}: ${message}`);
+    }
+  </script>
+</body>
+</html>

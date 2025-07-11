@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Health Details</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><img src="https://i.ibb.co/vzR0F9B/home-icon.png" alt="Home Icon"> Daily Tracker</a></li>
+      <li><a href="monthly-checklist.html"><img src="https://i.ibb.co/Vvz0B6k/calendar-icon.png" alt="Calendar Icon"> Monthly Progress</a></li>
+      <li><a href="subscriptions.html"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="medical.html" id="sidebarMedical"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>
+      <li><a href="account.html" id="sidebarAccount"><img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon"> Account</a></li>
+    </ul>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h1>MacroFuel</h1>
+        <p>Stay on track with your nutrition goals</p>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettingsPanel()">
+          <img src="settings.png" alt="Settings Icon">
+        </button>
+        <a href="account.html" class="account-btn">
+          <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
+        </a>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab" id="navDailyTracker">Daily Tracker</a>
+      <a href="monthly-checklist.html" class="nav-tab" id="navMonthlyProgress">Monthly Progress</a>
+      <a href="subscriptions.html" class="nav-tab" id="navSubscriptions">Subscription</a>
+      <a href="#" class="nav-tab" id="navDayChosen" style="display: none;"></a>
+    </div>
+
+    <div class="health-details-section-content">
+      <h2>Health Details</h2>
+      <p class="section-description">Manage your personal health information.</p>
+
+      <div class="health-details-card">
+        <h3>Basic Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="e.g., John">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="e.g., Doe">
+          </div>
+          <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob">
+          </div>
+          <div class="form-group">
+            <label for="sex">Sex</label>
+            <select id="sex">
+              <option value="">Select...</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="health-details-card">
+        <h3>Medical Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="bloodType">Blood Type</label>
+            <input type="text" id="bloodType" placeholder="e.g., O+">
+          </div>
+          <div class="form-group">
+            <label for="allergies">Allergies</label>
+            <input type="text" id="allergies" placeholder="e.g., Penicillin, Peanuts">
+          </div>
+          <div class="form-group">
+            <label for="wheelchair">Wheelchair User?</label>
+            <select id="wheelchair">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="medicationCount">Number of Medications</label>
+            <input type="number" id="medicationCount" min="0" value="0">
+          </div>
+        </div>
+      </div>
+
+      <button class="save-health-btn" onclick="saveHealthDetailsData()">Save Health Details</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAllData();
+        updateQuickStats();
+        setActiveNavTab();
+        loadHealthDetailsData(); // Load health details data when the page loads
+    });
+
+    function saveHealthDetailsData() {
+        const healthDetailsData = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            dob: document.getElementById('dob').value,
+            sex: document.getElementById('sex').value,
+            bloodType: document.getElementById('bloodType').value,
+            allergies: document.getElementById('allergies').value,
+            wheelchair: document.getElementById('wheelchair').value,
+            medicationCount: document.getElementById('medicationCount').value
+        };
+        if (isLocalStorageAvailable) {
+            localStorage.setItem('healthDetailsData', JSON.stringify(healthDetailsData));
+            showNotification('Health details saved!', 'success');
+        }
+    }
+
+    function loadHealthDetailsData() {
+        if (isLocalStorageAvailable) {
+            const storedData = localStorage.getItem('healthDetailsData');
+            if (storedData) {
+                const healthDetailsData = JSON.parse(storedData);
+                document.getElementById('firstName').value = healthDetailsData.firstName || '';
+                document.getElementById('lastName').value = healthDetailsData.lastName || '';
+                document.getElementById('dob').value = healthDetailsData.dob || '';
+                document.getElementById('sex').value = healthDetailsData.sex || '';
+                document.getElementById('bloodType').value = healthDetailsData.bloodType || '';
+                document.getElementById('allergies').value = healthDetailsData.allergies || '';
+                document.getElementById('wheelchair').value = healthDetailsData.wheelchair || 'no'; // Default to 'no'
+                document.getElementById('medicationCount').value = healthDetailsData.medicationCount || '0'; // Default to '0'
+            }
+        }
+    }
+
+    window.saveHealthDetailsData = saveHealthDetailsData;
+    window.loadHealthDetailsData = loadHealthDetailsData;
+  </script>
+</body>
+</html>
