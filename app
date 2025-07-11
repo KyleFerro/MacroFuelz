@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
       displayDayResult(date);
     }
   }
+
+  // Save current day's data every 30 seconds if localStorage is available
+  if (isLocalStorageAvailable) {
+    setInterval(saveDailyDataForToday, 30000); // Save current day's data every 30 seconds
+  }
 });
 
 // Sidebar functions
@@ -78,28 +83,78 @@ function toggleSidebar() {
 // Sets the active class on the correct navigation tab
 function setActiveNavTab() {
   const path = window.location.pathname;
-  const page = path.split('/').pop(); // Gets 'index.html', 'monthly-checklist.html', 'day-result.html' etc.
 
-  // Remove active from all static tabs first
-  document.querySelectorAll('.nav-tab').forEach(tab => {
+  // Select all main navigation tabs (if they exist on the current page)
+  const mainNavTabs = [
+    document.getElementById('navDailyTracker'),
+    document.getElementById('navMonthlyProgress'),
+    document.getElementById('navSubscriptions'),
+    document.getElementById('navDayChosen')
+  ].filter(Boolean); // Filter out nulls if an ID doesn't exist on a page
+
+  // Select all sidebar navigation links (if they exist on the current page)
+  const sidebarNavLinks = [
+    document.getElementById('sidebarDailyTracker'),
+    document.getElementById('sidebarMonthlyProgress'),
+    document.getElementById('sidebarSubscriptions'),
+    document.getElementById('sidebarMedical')
+  ].filter(Boolean); // Filter out nulls
+
+  // Clear all active classes from main nav tabs
+  mainNavTabs.forEach(tab => {
     tab.classList.remove('active');
+    if (tab.id === 'navDayChosen') {
+      tab.style.display = 'none'; // Hide specific day tab by default
+    }
   });
 
-  // Hide the dynamic day-chosen tab by default
-  const navDayChosen = document.getElementById('navDayChosen');
-  if (navDayChosen) {
-    navDayChosen.style.display = 'none';
-  }
+  // Clear all active classes from sidebar links
+  sidebarNavLinks.forEach(link => {
+      // Ensure the 'active' class is removed from the <li> parent if it's there,
+      // or directly from the <a> if the style targets the <a> itself.
+      link.classList.remove('active');
+      // If your sidebar active styling is on the <li>, you might need:
+      // if (link.parentElement && link.parentElement.tagName === 'LI') {
+      //     link.parentElement.classList.remove('active');
+      // }
+  });
 
-  // Set active for the current page's tab
-  if (page === 'index.html' || page === '') { // '' for root domain
-    const dailyTrackerTab = document.getElementById('navDailyTracker');
-    if (dailyTrackerTab) dailyTrackerTab.classList.add('active');
-  } else if (page === 'monthly-checklist.html') {
-    const monthlyProgressTab = document.getElementById('navMonthlyProgress');
-    if (monthlyProgressTab) monthlyProgressTab.classList.add('active');
-  } 
-  // The 'day-chosen' tab is handled directly by displayDayResult if on that page
+
+  // Set active class for main navigation tabs and sidebar links
+  if (path.includes('index.html') || path === '/') {
+    const navDailyTracker = document.getElementById('navDailyTracker');
+    if (navDailyTracker) navDailyTracker.classList.add('active');
+    const sidebarDailyTracker = document.getElementById('sidebarDailyTracker');
+    if (sidebarDailyTracker) sidebarDailyTracker.classList.add('active');
+  } else if (path.includes('monthly-checklist.html')) {
+    const navMonthlyProgress = document.getElementById('navMonthlyProgress');
+    if (navMonthlyProgress) navMonthlyProgress.classList.add('active');
+    const sidebarMonthlyProgress = document.getElementById('sidebarMonthlyProgress');
+    if (sidebarMonthlyProgress) sidebarMonthlyProgress.classList.add('active');
+  } else if (path.includes('subscriptions.html')) {
+    const navSubscriptions = document.getElementById('navSubscriptions');
+    if (navSubscriptions) navSubscriptions.classList.add('active');
+    const sidebarSubscriptions = document.getElementById('sidebarSubscriptions');
+    if (sidebarSubscriptions) sidebarSubscriptions.classList.add('active');
+  } else if (path.includes('medical.html')) { // New case for medical.html
+    const sidebarMedical = document.getElementById('sidebarMedical');
+    if (sidebarMedical) sidebarMedical.classList.add('active');
+  } else if (path.includes('day-result.html')) {
+    const navDayChosen = document.getElementById('navDayChosen');
+    if (navDayChosen) {
+      navDayChosen.style.display = 'block'; // Show the specific day tab
+      navDayChosen.classList.add('active');
+      const urlParams = new URLSearchParams(window.location.search);
+      const dateKey = urlParams.get('date');
+      if (dateKey) {
+        const date = new Date(dateKey);
+        navDayChosen.textContent = `Day: ${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+      }
+    }
+    // For day-result, typically the 'Monthly Progress' sidebar link remains active as it's a sub-page.
+    const sidebarMonthlyProgress = document.getElementById('sidebarMonthlyProgress');
+    if (sidebarMonthlyProgress) sidebarMonthlyProgress.classList.add('active');
+  }
 }
 
 
@@ -278,13 +333,11 @@ function updateMacrosDisplay() {
     const consumedEl = document.getElementById(`consumed${macro.charAt(0).toUpperCase() + macro.slice(1)}`);
     const remainingEl = document.getElementById(`remaining${macro.charAt(0).toUpperCase() + macro.slice(1)}`);
     const progressEl = document.getElementById(`${macro}Progress`);
-
     if (consumedEl && remainingEl && progressEl) {
       const consumed = Math.round(dailyData.consumed[macro]);
       const goal = dailyData.goals[macro];
       const remaining = Math.max(0, goal - consumed);
       const progress = Math.min(100, (consumed / goal) * 100);
-      
       consumedEl.textContent = consumed;
       remainingEl.textContent = remaining;
       progressEl.style.width = progress + '%';
@@ -295,7 +348,7 @@ function updateMacrosDisplay() {
 function updateMealsList() {
   const mealsList = document.getElementById('mealsList'); // Corrected ID to match HTML
   if (!mealsList) return;
-  
+
   if (dailyData.meals.length === 0) {
     mealsList.innerHTML = `
       <div class="empty-state">
@@ -324,69 +377,123 @@ function updateQuickStats() {
   // This is called after loadDailyDataForToday() on DOMContentLoaded
   const totalMeals = dailyData.meals.length;
   const calorieProgress = dailyData.goals.calories > 0 ? Math.round((dailyData.consumed.calories / dailyData.goals.calories) * 100) : 0;
-  const streakDays = calculateStreak();
-  
+
   const totalMealsEl = document.getElementById('totalMeals');
   const calorieProgressEl = document.getElementById('calorieProgress');
-  const streakDaysEl = document.getElementById('streakDays');
+  const streakDaysEl = document.getElementById('streakDays'); // Assuming streakDays is managed elsewhere or is a placeholder
 
   if (totalMealsEl) totalMealsEl.textContent = totalMeals;
-  // Handle NaN if calorieGoal is 0 or undefined
-  if (calorieProgressEl) calorieProgressEl.textContent = (isNaN(calorieProgress) || !isFinite(calorieProgress) ? 0 : calorieProgress) + '%';
-  if (streakDaysEl) streakDaysEl.textContent = streakDays;
+  if (calorieProgressEl) calorieProgressEl.textContent = `${calorieProgress}%`;
+  // streakDaysEl is not updated here, assuming it's a fixed value or updated by another function not shown
 }
 
 function updateSummaryStats() {
-  const summaryCaloriesEl = document.getElementById('summaryCalories');
+  // This function is for `index.html`'s summary elements.
+  // It's called by `updateDisplay`.
   const summaryProteinEl = document.getElementById('summaryProtein');
   const summaryCarbsEl = document.getElementById('summaryCarbs');
   const summaryFatsEl = document.getElementById('summaryFats');
 
-  // These elements are only on day-result.html, so check for existence
-  if (summaryCaloriesEl) summaryCaloriesEl.textContent = Math.round(dailyData.consumed.calories);
   if (summaryProteinEl) summaryProteinEl.textContent = Math.round(dailyData.consumed.protein) + 'g';
   if (summaryCarbsEl) summaryCarbsEl.textContent = Math.round(dailyData.consumed.carbs) + 'g';
   if (summaryFatsEl) summaryFatsEl.textContent = Math.round(dailyData.consumed.fats) + 'g';
 }
 
 
-// Monthly Progress and Day Result functions (primarily for monthly-checklist.html and day-result.html)
-function getDaysInMonth(year, month) {
-  return new Date(year, month + 1, 0).getDate();
+// Local Storage functions
+function saveDailyDataForToday() {
+  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  allDailyData[todayKey] = JSON.parse(JSON.stringify(dailyData)); // Deep copy to prevent reference issues
+  if (isLocalStorageAvailable) {
+    localStorage.setItem('allDailyData', JSON.stringify(allDailyData));
+  } else {
+    showNotification('Local storage is not available. Data will not be saved.');
+  }
 }
 
-function formatYYYYMMDD(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+function loadDailyDataForToday() {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  if (allDailyData[todayKey]) {
+    dailyData = JSON.parse(JSON.stringify(allDailyData[todayKey]));
+  } else {
+    // If no data for today, reset consumed and meals, but keep goals
+    dailyData.consumed = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    dailyData.meals = [];
+    // Goals remain from initial state or last set goals
+  }
 }
 
+function loadAllData() {
+  if (isLocalStorageAvailable) {
+    const storedData = localStorage.getItem('allDailyData');
+    if (storedData) {
+      allDailyData = JSON.parse(storedData);
+    }
+  }
+}
+
+// Notification system
+function showNotification(message) {
+  let notification = document.getElementById('notification');
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.classList.add('notification');
+    document.body.appendChild(notification);
+  }
+  notification.textContent = message;
+  notification.classList.add('show');
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 3000); // Hide after 3 seconds
+}
+
+// Monthly checklist page specific functions
 function displayMonthlyChecklist(month, year) {
   const checklistGrid = document.querySelector('.checklist-grid');
-  const currentMonthYearEl = document.getElementById('currentMonthYear');
-  if (!checklistGrid || !currentMonthYearEl) return;
+  const currentMonthYearHeader = document.getElementById('currentMonthYear');
+  if (!checklistGrid || !currentMonthYearHeader) return;
 
-  currentMonthYearEl.textContent = new Date(year, month).toLocaleString('en-US', { month: 'long', year: 'numeric' });
-  checklistGrid.innerHTML = '';
-  
-  const daysInMonth = getDaysInMonth(year, month);
-  
-  for (let i = 1; i <= daysInMonth; i++) {
-    const date = new Date(year, month, i);
-    const dateKey = formatYYYYMMDD(date);
-    
-    // Check if data exists for this day and if calorie goal was met (or if a flag exists)
-    const dayDataForChecklist = allDailyData[dateKey]; // Use allDailyData here
-    // Consider goal met if consumed calories >= goal calories AND goal is not 0 (to avoid false positives for unset goals)
-    const isChecked = dayDataForChecklist ? (dayDataForChecklist.consumed.calories >= dayDataForChecklist.goals.calories && dayDataForChecklist.goals.calories > 0) : false;
+  currentMonth = month;
+  currentYear = year;
 
-    // Direct link to day-result.html with date parameter
+  currentMonthYearHeader.textContent = new Date(year, month).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  checklistGrid.innerHTML = ''; // Clear previous days
+
+  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 for Sunday, 1 for Monday, etc.
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Add empty placeholders for days before the 1st
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    const emptyDiv = document.createElement('div');
+    checklistGrid.appendChild(emptyDiv);
+  }
+
+  // Add days of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayData = allDailyData[dateKey];
+    const hasData = dayData && (dayData.consumed.calories > 0 || dayData.meals.length > 0);
+
     const dayDiv = document.createElement('div');
-    dayDiv.className = 'day-checkbox';
+    dayDiv.classList.add('day-checkbox');
+    if (hasData) {
+        dayDiv.classList.add('has-data');
+    }
+
+    // Check if it's today's date
+    const today = new Date();
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+    if (isToday) {
+        dayDiv.classList.add('today');
+    }
+
     dayDiv.innerHTML = `
-      <input type="checkbox" id="day${i}" data-date="${dateKey}" ${isChecked ? 'checked' : ''} disabled>
-      <label for="day${i}" onclick="window.location.href='day-result.html?date=${dateKey}'">${i}</label>
+      <input type="checkbox" id="day${day}" ${hasData ? 'checked' : ''} disabled>
+      <label for="day${day}" onclick="handleDayClick('${dateKey}')">
+        <span class="day-number">${day}</span>
+        ${hasData ? '<span class="check-icon"></span>' : ''}
+      </label>
     `;
     checklistGrid.appendChild(dayDiv);
   }
@@ -404,246 +511,87 @@ function changeMonth(delta) {
   displayMonthlyChecklist(currentMonth, currentYear);
 }
 
-function displayDayResult(dateKey) {
-  const dayDataToDisplay = allDailyData[dateKey] || { // Use allDailyData here
-    consumed: { calories: 0, protein: 0, carbs: 0, fats: 0 },
-    goals: { calories: 2000, protein: 150, carbs: 250, fats: 67 }, // Default goals for display if no data
-    meals: []
-  };
+function handleDayClick(dateKey) {
+  // Redirect to day-result.html with the selected date
+  window.location.href = `day-result.html?date=${dateKey}`;
+}
 
+// Day result page specific functions
+function displayDayResult(dateKey) {
+  const data = allDailyData[dateKey];
   const resultDateEl = document.getElementById('resultDate');
   const resultCaloriesEl = document.getElementById('resultCalories');
   const resultProteinEl = document.getElementById('resultProtein');
   const resultCarbsEl = document.getElementById('resultCarbs');
   const resultFatsEl = document.getElementById('resultFats');
-  const aiSuggestedMealsEl = document.getElementById('aiSuggestedMeals');
   const resultMealsListEl = document.getElementById('resultMealsList');
-  const navDayChosen = document.getElementById('navDayChosen'); // Get the dynamic tab element
+  const aiSuggestedMealsEl = document.getElementById('aiSuggestedMeals'); // New element
 
-  if (!resultDateEl || !resultCaloriesEl || !resultProteinEl || !resultCarbsEl || !resultFatsEl || !aiSuggestedMealsEl || !resultMealsListEl || !navDayChosen) {
-    console.error('Missing elements for day result display or dynamic navigation tab.');
+  if (!resultDateEl || !resultCaloriesEl || !resultProteinEl || !resultCarbsEl || !resultFatsEl || !resultMealsListEl) {
+    console.error("Missing elements for day result display.");
     return;
   }
 
-  const displayDate = new Date(dateKey + 'T00:00:00'); // Ensure correct date interpretation
-  resultDateEl.textContent = displayDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  resultCaloriesEl.textContent = Math.round(dayDataToDisplay.consumed.calories);
-  resultProteinEl.textContent = Math.round(dayDataToDisplay.consumed.protein) + 'g';
-  resultCarbsEl.textContent = Math.round(dayDataToDisplay.consumed.carbs) + 'g';
-  resultFatsEl.textContent = Math.round(dayDataToDisplay.consumed.fats) + 'g';
-
-  // AI Suggestion Logic
-  const caloriesMet = dayDataToDisplay.goals.calories > 0 && dayDataToDisplay.consumed.calories >= dayDataToDisplay.goals.calories;
-  const proteinMet = dayDataToDisplay.goals.protein > 0 && dayDataToDisplay.consumed.protein >= dayDataToDisplay.goals.protein;
-  const carbsMet = dayDataToDisplay.goals.carbs > 0 && dayDataToDisplay.consumed.carbs >= dayDataToDisplay.goals.carbs;
-  const fatsMet = dayDataToDisplay.goals.fats > 0 && dayDataToDisplay.consumed.fats >= dayDataToDisplay.goals.fats;
-
-  let aiSuggestion = "";
-  if (caloriesMet && proteinMet && carbsMet && fatsMet) {
-    aiSuggestion = "Great job! You hit all your calorie and macro goals for the day!";
-  } else if (dayDataToDisplay.goals.calories === 0 && dayDataToDisplay.goals.protein === 0 && dayDataToDisplay.goals.carbs === 0 && dayDataToDisplay.goals.fats === 0) {
-    aiSuggestion = "No goals set for this day. Set your daily goals on the Daily Tracker page to get feedback!";
+  // Set active nav tab for the specific day
+  const navDayChosen = document.getElementById('navDayChosen');
+  if (navDayChosen) {
+    navDayChosen.style.display = 'block';
+    navDayChosen.textContent = `Day: ${new Date(dateKey).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    navDayChosen.classList.add('active'); // Set it active
+    // Deactivate other static tabs if active
+    document.getElementById('navDailyTracker').classList.remove('active');
+    document.getElementById('navMonthlyProgress').classList.remove('active');
+    const subscriptionsTab = document.getElementById('navSubscriptions');
+    if (subscriptionsTab) subscriptionsTab.classList.remove('active');
   }
-  else {
-    const missingCalories = Math.max(0, dayDataToDisplay.goals.calories - dayDataToDisplay.consumed.calories);
-    const missingProtein = Math.max(0, dayDataToDisplay.goals.protein - dayDataToDisplay.consumed.protein);
-    const missingCarbs = Math.max(0, dayDataToDisplay.goals.carbs - dayDataToDisplay.consumed.carbs);
-    const missingFats = Math.max(0, dayDataToDisplay.goals.fats - dayDataToDisplay.consumed.fats);
 
-    let suggestions = [];
-    if (missingCalories > 0) suggestions.push(`${Math.round(missingCalories)} calories`);
-    if (missingProtein > 0) suggestions.push(`${Math.round(missingProtein)}g protein`);
-    if (missingCarbs > 0) suggestions.push(`${Math.round(missingCarbs)}g carbs`);
-    if (missingFats > 0) suggestions.push(`${Math.round(missingFats)}g fats`);
 
-    if (suggestions.length > 0) {
-      aiSuggestion = `You were missing ${suggestions.join(', ')}. Consider adding more nutrient-dense foods next time!`;
+  if (data) {
+    resultDateEl.textContent = new Date(dateKey).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    resultCaloriesEl.textContent = `${Math.round(data.consumed.calories)} kcal`;
+    resultProteinEl.textContent = `${Math.round(data.consumed.protein)}g`;
+    resultCarbsEl.textContent = `${Math.round(data.consumed.carbs)}g`;
+    resultFatsEl.textContent = `${Math.round(data.consumed.fats)}g`;
+
+    if (data.meals.length === 0) {
+      resultMealsListEl.innerHTML = '<p class="empty-state">No meals logged for this day.</p>';
     } else {
-      aiSuggestion = "Looks like you hit your goals or went slightly over. Keep up the good work!";
-    }
-  }
-  aiSuggestedMealsEl.textContent = aiSuggestion;
-
-  let mealsHtml = '';
-  if (dayDataToDisplay.meals.length === 0) {
-    mealsHtml = `
-      <div class="empty-state">
-        <p>No meals recorded for this day.</p>
-      </div>
-    `;
-  } else {
-    mealsHtml = dayDataToDisplay.meals.map((meal, index) => `
-      <div class="meal-item">
-        <div class="meal-info">
-          <div class="meal-name">${meal.name}</div>
-          <div class="meal-macros">
-            P: <span class="macro-protein">${Math.round(meal.protein)}g</span> • C: <span class="macro-carbs">${Math.round(meal.carbs)}g</span> • F: <span class="macro-fats">${Math.round(meal.fats)}g</span>
+      resultMealsListEl.innerHTML = data.meals.map(meal => `
+        <div class="meal-item">
+          <div class="meal-info">
+            <div class="meal-name">${meal.name}</div>
+            <div class="meal-macros">
+              P: <span class="macro-protein">${Math.round(meal.protein)}g</span> • C: <span class="macro-carbs">${Math.round(meal.carbs)}g</span> • F: <span class="macro-fats">${Math.round(meal.fats)}g</span>
+            </div>
           </div>
+          <div class="meal-calories">${Math.round(meal.calories)} cal</div>
         </div>
-        <div class="meal-calories">${Math.round(meal.calories)} cal</div>
-      </div>
-    `).join('');
-  }
-  resultMealsListEl.innerHTML = mealsHtml;
+      `).join('');
+    }
 
-  // Set active state for the dynamic day-chosen tab
-  document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active')); // Clear all active states
-  navDayChosen.textContent = displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Shorter date for tab
-  navDayChosen.style.display = 'block'; // Make it visible
-  navDayChosen.classList.add('active'); // Set it as active
-  navDayChosen.href = `day-result.html?date=${dateKey}`; // Ensure it links back to itself (useful if navigated away and then back)
-}
-
-
-function calculateStreak() {
-  let streak = 0;
-  let currentDate = new Date();
-  
-  // Go back day by day to calculate streak
-  for (let i = 0; i < 365; i++) { // Check up to a year back
-    const checkDate = new Date(currentDate);
-    checkDate.setDate(currentDate.getDate() - i);
-    const dateKey = formatYYYYMMDD(checkDate);
-
-    const dayDataForStreak = allDailyData[dateKey];
-    // Streak only counts if goals are set AND met
-    const isGoalMet = dayDataForStreak && dayDataForStreak.goals.calories > 0 && dayDataForStreak.consumed.calories >= dayDataForStreak.goals.calories;
-
-    if (i === 0) { // For the current day
-      if (isGoalMet) {
-        streak++;
+    // AI Suggested Meals - Placeholder for now
+    if (aiSuggestedMealsEl) {
+      const remainingCalories = data.goals.calories - data.consumed.calories;
+      if (remainingCalories > 0) {
+        aiSuggestedMealsEl.textContent = `You have ${Math.round(remainingCalories)} calories remaining. Consider a snack like an apple and peanut butter.`;
+      } else if (remainingCalories < 0) {
+        aiSuggestedMealsEl.textContent = `You've exceeded your calorie goal by ${Math.abs(Math.round(remainingCalories))} calories.`;
       } else {
-        // If today's goal is not met (or not set), but there's data for today, streak is 0
-        // If no data for today, then check yesterday for streak
-        if (dayDataForStreak) { // If data exists but goal isn't met or isn't set
-          streak = 0;
-          break; 
-        }
-      }
-    } else { // For past days
-      if (isGoalMet) {
-        streak++;
-      } else {
-        break; // Streak breaks if a previous day's goal was not met or not set
+        aiSuggestedMealsEl.textContent = `You've hit your calorie goal!`;
       }
     }
-  }
-  return streak;
-}
 
-
-// Data persistence functions
-function getCurrentDateKey() {
-  return formatYYYYMMDD(new Date());
-}
-
-function saveAllData() {
-  if (!isLocalStorageAvailable) return;
-  try {
-    localStorage.setItem('allDailyData', JSON.stringify(allDailyData));
-    showNotification('Data saved successfully!');
-  } catch (e) {
-    console.error("Error saving data to localStorage: ", e);
-    showNotification('Failed to save data. Storage might be full.');
-  }
-}
-
-function loadAllData() {
-  if (!isLocalStorageAvailable) return;
-  const savedAllData = localStorage.getItem('allDailyData');
-  if (savedAllData) {
-    try {
-      allDailyData = JSON.parse(savedAllData);
-    } catch (e) {
-      console.error("Error parsing saved data from localStorage: ", e);
-      allDailyData = {}; // Reset if data is corrupted
-    }
-  }
-  _migrateLegacyDailyData(); // Attempt to migrate old single-day data
-}
-
-// Attempts to migrate old 'dailyData' key to the new 'allDailyData' structure
-function _migrateLegacyDailyData() {
-  if (!isLocalStorageAvailable) return;
-  const legacyDailyDataString = localStorage.getItem('dailyData');
-  if (legacyDailyDataString) {
-    try {
-      const legacyDailyData = JSON.parse(legacyDailyDataString);
-      const todayKey = getCurrentDateKey();
-      // Only migrate if no data already exists for today in the new structure
-      if (!allDailyData[todayKey]) {
-        allDailyData[todayKey] = legacyDailyData;
-        saveAllData(); // Save the newly migrated data
-        localStorage.removeItem('dailyData'); // Remove the old key
-        console.log("Migrated legacy 'dailyData' to new 'allDailyData' structure.");
-      }
-    } catch (e) {
-      console.error("Error migrating legacy dailyData: ", e);
-    }
-  }
-}
-
-function saveDailyDataForToday() {
-  const dateKey = getCurrentDateKey();
-  allDailyData[dateKey] = dailyData; // Save the current dailyData object
-  saveAllData(); // Save the entire allDailyData object to localStorage
-}
-
-function loadDailyDataForToday() {
-  const dateKey = getCurrentDateKey();
-  if (allDailyData[dateKey]) {
-    // Deep copy to ensure we don't modify the stored object directly unless intended
-    dailyData = JSON.parse(JSON.stringify(allDailyData[dateKey])); 
   } else {
-    // If no data for today, initialize with default goals and empty meals
-    dailyData = {
-      consumed: { calories: 0, protein: 0, carbs: 0, fats: 0 },
-      goals: { calories: 2000, protein: 150, carbs: 250, fats: 67 }, // Default goals for a new day
-      meals: []
-    };
+    resultDateEl.textContent = new Date(dateKey).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    resultCaloriesEl.textContent = '0 kcal';
+    resultProteinEl.textContent = '0g';
+    resultCarbsEl.textContent = '0g';
+    resultFatsEl.textContent = '0g';
+    resultMealsListEl.innerHTML = '<p class="empty-state">No data available for this day.</p>';
+    if (aiSuggestedMealsEl) {
+      aiSuggestedMealsEl.textContent = `No data to provide suggestions.`;
+    }
   }
-}
-
-// Utility functions
-function showNotification(message) {
-  const notification = document.createElement('div');
-  notification.className = 'notification';
-  notification.textContent = message;
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #48bb78;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    font-weight: 600;
-    font-size: 14px;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-  `;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.style.transform = 'translateX(0)';
-  }, 100);
-  
-  setTimeout(() => {
-    notification.style.transform = 'translateX(100%)';
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-      }
-    }, 300);
-  }, 3000);
-}
-
-// Auto-save functionality for the current day's data
-if (isLocalStorageAvailable) {
-  setInterval(saveDailyDataForToday, 30000); // Save current day's data every 30 seconds
 }
 
 // Handle form submission with Enter key (only relevant on index.html)
@@ -677,4 +625,4 @@ window.updateDisplay = updateDisplay; // For index.html
 window.updateQuickStats = updateQuickStats; // For all pages
 window.toggleSettingsPanel = toggleSettingsPanel; // New global function
 window.setDailyGoals = setDailyGoals; // New global function
-window.setActiveNavTab = setActiveNavTab; // New global function for tab highlighting
+window.setActiveNavTab = setActiveNavTab; // Make setActiveNavTab globally available
