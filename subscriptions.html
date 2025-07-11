@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Subscriptions</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html"><img src="https://i.ibb.co/vzR0F9B/home-icon.png" alt="Home Icon"> Daily Tracker</a></li>
+      <li><a href="monthly-checklist.html"><img src="https://i.ibb.co/Vvz0B6k/calendar-icon.png" alt="Calendar Icon"> Monthly Progress</a></li>
+      <li><a href="subscriptions.html"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="medical.html" id="sidebarMedical"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>    </ul>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h1>Subscriptions</h1>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettingsPanel()">
+          <img src="https://i.ibb.co/z5p5DkK/settings-cog.png" alt="Settings Icon">
+        </button>
+        <a href="medical.html" class="account-btn">
+  <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
+</a>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab" id="navDailyTracker">Daily Tracker</a>
+      <a href="monthly-checklist.html" class="nav-tab" id="navMonthlyProgress">Monthly Progress</a>
+      <a href="subscriptions.html" class="nav-tab" id="navSubscription">Subscription</a>
+    </div>
+
+    <div class="main-content">
+      <div class="subscription-section">
+        <div class="coin-counter-container">
+          <h3>Your Coins:</h3>
+          <div class="coin-display" id="coinCounter">0</div>
+        </div>
+
+        <div class="subscription-plan">
+          <p class="plan-text">$5 Monthly for Big Benefits</p>
+          <button class="view-plan-btn" onclick="window.location.href='#'">View Plan</button>
+        </div>
+      </div>
+
+      <div class="gifts-discounts-section">
+        <h2>Gifts & Discounts</h2>
+        <div class="brand-grid">
+          <div class="brand-card">
+            <img src="https://via.placeholder.com/150x80?text=Brand+A" alt="Brand A Logo">
+            <h3>Brand A</h3>
+            <p>Exclusive discount on their premium products for MacroFuel subscribers.</p>
+          </div>
+          <div class="brand-card">
+            <img src="https://via.placeholder.com/150x80?text=Brand+B" alt="Brand B Logo">
+            <h3>Brand B</h3>
+            <p>Special offer on their healthy meal prep services. Limited time only!</p>
+          </div>
+          <div class="brand-card">
+            <img src="https://via.placeholder.com/150x80?text=Brand+C" alt="Brand C Logo">
+            <h3>Brand C</h3>
+            <p>Get a percentage off your first purchase of fitness apparel.</p>
+          </div>
+          <div class="brand-card">
+            <img src="https://via.placeholder.com/150x80?text=Brand+D" alt="Brand D Logo">
+            <h3>Brand D</h3>
+            <p>Free consultation and a discount on their wellness programs.</p>
+          </div>
+          <div class="brand-card">
+            <img src="https://via.placeholder.com/150x80?text=Brand+E" alt="Brand E Logo">
+            <h3>Brand E</h3>
+            <p>Save on organic groceries and healthy snacks.</p>
+          </div>
+          <div class="brand-card">
+            <img src="https://via.placeholder.com/150x80?text=Brand+F" alt="Brand F Logo">
+            <h3>Brand F</h3>
+            <p>Enjoy a special discount on their fitness tracking devices.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAllData();
+      updateQuickStats();
+      setActiveNavTab(); // Ensure active tab is set for this page
+    });
+  </script>
+</body>
+</html>

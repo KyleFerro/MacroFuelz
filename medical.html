@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacroFuel - Medical Information</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html" id="sidebarDailyTracker"><img src="https://i.ibb.co/vzR0F9B/home-icon.png" alt="Home Icon"> Daily Tracker</a></li>
+      <li><a href="monthly-checklist.html" id="sidebarMonthlyProgress"><img src="https://i.ibb.co/Vvz0B6k/calendar-icon.png" alt="Calendar Icon"> Monthly Progress</a></li>
+      <li><a href="subscriptions.html" id="sidebarSubscriptions"><img src="https://i.ibb.co/Wc63d5y/dollar-icon.png" alt="Subscription Icon"> Subscription</a></li>
+      <li><a href="medical.html" id="sidebarMedical"><img src="https://i.ibb.co/S073rFm/medical-icon.png" alt="Medical Icon"> Medical</a></li>
+    </ul>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h1>MacroFuel</h1>
+          <p>Professional Nutrition Tracking</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="totalMeals">0</div>
+            <div class="quick-stat-label">Meals Today</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="calorieProgress">0%</div>
+            <div class="quick-stat-label">Goal Progress</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-value" id="streakDays">0</div>
+            <div class="quick-stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettingsPanel()">
+          <img src="https://i.ibb.co/z5p5DkK/settings-cog.png" alt="Settings Icon">
+        </button>
+        <a href="medical.html" class="account-btn">
+          <img src="https://i.ibb.co/Q8N4d5H/account-icon.png" alt="Account Icon">
+        </a>
+      </div>
+    </div>
+
+    <div class="medical-section-content">
+        <h2>Medical Information</h2>
+
+        <div class="medical-details-card">
+            <h3>Medical Details</h3>
+            <div class="form-group">
+                <label for="height">Height (cm)</label>
+                <input type="number" id="height" placeholder="e.g., 175">
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight (kg)</label>
+                <input type="number" id="weight" placeholder="e.g., 70">
+            </div>
+            <div class="form-group">
+                <label for="bloodType">Blood Type</label>
+                <input type="text" id="bloodType" placeholder="e.g., O+, AB-">
+            </div>
+            <div class="form-group">
+                <label for="allergies">Allergies</label>
+                <input type="text" id="allergies" placeholder="e.g., Peanuts, Dairy (comma-separated)">
+            </div>
+            <div class="form-group">
+                <label for="chronicDiseases">Chronic Diseases</label>
+                <input type="text" id="chronicDiseases" placeholder="e.g., Diabetes, Hypertension (comma-separated)">
+            </div>
+        </div>
+
+        <div class="emergency-contact-card">
+            <h3>Emergency Contact</h3>
+            <div class="form-group">
+                <label for="emergencyName">Name</label>
+                <input type="text" id="emergencyName" placeholder="Contact Name">
+            </div>
+            <div class="form-group">
+                <label for="emergencyRelationship">Relationship</label>
+                <input type="text" id="emergencyRelationship" placeholder="e.g., Parent, Spouse">
+            </div>
+            <div class="form-group">
+                <label for="emergencyPhone">Phone Number</label>
+                <input type="tel" id="emergencyPhone" placeholder="e.g., +1234567890">
+            </div>
+        </div>
+
+        <div class="medications-card">
+            <h3>Medications</h3>
+            <div class="form-group">
+                <label for="medicationName">Medication Name</label>
+                <input type="text" id="medicationName" placeholder="e.g., Insulin">
+            </div>
+            <div class="form-group">
+                <label for="dosage">Dosage</label>
+                <input type="text" id="dosage" placeholder="e.g., 10 units">
+            </div>
+            <div class="form-group">
+                <label for="frequency">Frequency</label>
+                <input type="text" id="frequency" placeholder="e.g., Once a day">
+            </div>
+        </div>
+
+        <button class="save-medical-btn" onclick="saveMedicalData()">Save Medical Data</button>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAllData(); // Load all historical data
+      updateQuickStats(); // Update quick stats from any page
+      setActiveNavTab(); // Set active nav tab (sidebar link for this page)
+      loadMedicalData(); // Load medical data when page loads
+    });
+
+    // Dummy functions for saving/loading medical data (to be implemented in app.js or here)
+    function saveMedicalData() {
+        const medicalData = {
+            height: document.getElementById('height').value,
+            weight: document.getElementById('weight').value,
+            bloodType: document.getElementById('bloodType').value,
+            allergies: document.getElementById('allergies').value,
+            chronicDiseases: document.getElementById('chronicDiseases').value,
+            emergencyName: document.getElementById('emergencyName').value,
+            emergencyRelationship: document.getElementById('emergencyRelationship').value,
+            emergencyPhone: document.getElementById('emergencyPhone').value,
+            medicationName: document.getElementById('medicationName').value,
+            dosage: document.getElementById('dosage').value,
+            frequency: document.getElementById('frequency').value
+        };
+        if (isLocalStorageAvailable) {
+            localStorage.setItem('medicalData', JSON.stringify(medicalData));
+            showNotification('Medical data saved!', 'success');
+        }
+    }
+
+    function loadMedicalData() {
+        if (isLocalStorageAvailable) {
+            const storedData = localStorage.getItem('medicalData');
+            if (storedData) {
+                const medicalData = JSON.parse(storedData);
+                document.getElementById('height').value = medicalData.height || '';
+                document.getElementById('weight').value = medicalData.weight || '';
+                document.getElementById('bloodType').value = medicalData.bloodType || '';
+                document.getElementById('allergies').value = medicalData.allergies || '';
+                document.getElementById('chronicDiseases').value = medicalData.chronicDiseases || '';
+                document.getElementById('emergencyName').value = medicalData.emergencyName || '';
+                document.getElementById('emergencyRelationship').value = medicalData.emergencyRelationship || '';
+                document.getElementById('emergencyPhone').value = medicalData.emergencyPhone || '';
+                document.getElementById('medicationName').value = medicalData.medicationName || '';
+                document.getElementById('dosage').value = medicalData.dosage || '';
+                document.getElementById('frequency').value = medicalData.frequency || '';
+            }
+        }
+    }
+
+    // Make these functions globally available if they are to be called from app.js or other scripts
+    window.saveMedicalData = saveMedicalData;
+    window.loadMedicalData = loadMedicalData;
+  </script>
+</body>
+</html>
